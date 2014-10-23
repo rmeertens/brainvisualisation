@@ -113,6 +113,7 @@
     
 			var VariableParameters = function() {
 			  this.message = 'something something';
+              this.videolink = 'test test'
 			  this.speed = 0.8;
 			  this.minimumCluster = 0;
 			  this.maximumCluster = 0;
@@ -138,7 +139,7 @@
 				var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
 				var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
                 var f3 = gui.addFolder('Information');
-                f3.add(text,'Youtube video')
+                f3.add(text,'videolink')
 				f2.open();
 				f3.open();
 
