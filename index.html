@@ -137,8 +137,10 @@
 				var f2 = gui.addFolder('Min and max clusters');
 				var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
 				var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
+                var f3 = gui.addFolder('Information');
+                f3.add(text,'Youtube video')
 				f2.open();
-				
+				f3.open();
 
 				maxController.onChange(function (value) {
 				 	if (text.minimumCluster > value)
