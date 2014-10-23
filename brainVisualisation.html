@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Visualisation of the brain!</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #cccccc;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+
+				background-color: #050505;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+
+			a {
+
+				color: #0080ff;
+			}
+		</style>
+	</head>
+	<body>
+	
+	<div id="inputs" class="clearfix">
+        Please wait while the data is loading!
+    </div>
+
+	<div id="container"></div>
+
+	<script src="three.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/libs/stats.min.js"></script>  
+	<script src="js/controls/OrbitControls.js"></script>
+
+    <script>
+
+		if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+		var container, stats;
+
+		var camera, scene, renderer;
+
+		var mesh;
+		var mouseX = 0, mouseY = 0;
+		var windowHalfX, windowHalfY;
+		var controls;
+		var isSpaceDown = false;
+
+        $(document).ready(function() {
+            inputs.innerHTML = "Started loading data!";
+  		    openCSVFile('node1sup.csv','edges1sup.csv');
+		 });
+
+		function openCSVFile(CSVfileName,edgesFilename){
+            // create the object
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                processCSVContents(httpRequest,edgesFilename);
+            }
+            // Send the request
+            httpRequest.open("POST", CSVfileName, true);
+            httpRequest.send(null);
+
+           
+        }
+
+        function processCSVContents(httpRequest,edgesFilename){
+            console.log("processing nodes");
+            var coordinates = new Array();
+            if (httpRequest.readyState == 4){
+                // everything is good, the response is received
+                if ((httpRequest.status == 200) || (httpRequest.status == 0)){
+                    // Analys the contents using the stats library
+                    // and display the results
+                    CSVContents = httpRequest.responseText;
+                    console.log(CSVContents);
+	                var data = $.csv.toArrays(CSVContents);
+				    for(var row in data) {
+				    	coordinates[row] = new Array();
+						coordinates[row][0] = data[row][1] 
+					    coordinates[row][1] = data[row][2] 
+					    coordinates[row][2] = data[row][3] 
+				    }
+				    inputs.innerHTML = "Done loading nodes!";
+				    // Load edges
+		            var httpRequest = new XMLHttpRequest();
+		            httpRequest.onreadystatechange = function() {
+		                processEdgesContent(httpRequest,coordinates);
+		            }
+		            // Send the request
+		            httpRequest.open("POST", edgesFilename, true);
+		            httpRequest.send(null);
+				    
+	                console.log(" => Response status: " + httpRequest.status)
+                } 
+                else {
+                	alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
+                }
+            }
+        }
+
+
+        function processEdgesContent(httpRequest,coordinates){
+            console.log("proecessing edges");
+            var edges = new Array();
+            if (httpRequest.readyState == 4){
+                // everything is good, the response is received
+                if ((httpRequest.status == 200) || (httpRequest.status == 0)){
+                    // Analys the contents using the stats library
+                    // and display the results
+                    CSVContents = httpRequest.responseText;
+                    console.log(CSVContents);
+                     var data = $.csv.toArrays(CSVContents);
+                     
+				      for(var row=1; row < data.length; row++) {
+				      	edges[row-1] = new Array();
+					    edges[row-1][0] = data[row][0] 
+					    edges[row-1][1] = data[row][1] 
+					    
+				      }
+				      inputs.innerHTML = "Done loading edges!";
+				     
+				     init(coordinates,edges);
+					animate();
+
+                    console.log(" => Response status: " + httpRequest.status)
+                    console.log(CSVContents);
+                } else {
+                alert(' => There was a problem with the request. ' 
+                        + httpRequest.status + httpRequest.responseText);
+                }
+            }
+        }
+
+			
+
+			function init(coordinates,edges) {
+				container = document.getElementById( 'container' );
+
+				//
+
+				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
+				camera.position.z = 250;
+				camera.position.y = -50;
+				scene = new THREE.Scene();
+				scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+
+  				controls = new THREE.OrbitControls( camera );
+  				controls.addEventListener( 'change', render );
+				//
+
+				var particles = coordinates.length;
+
+				var geometry = new THREE.BufferGeometry();
+
+				geometry.addAttribute( 'position', Float32Array, particles, 3 );
+				geometry.addAttribute( 'color', Float32Array, particles, 3 );
+
+				var positions = geometry.attributes.position.array;
+				var colors = geometry.attributes.color.array;
+
+				var color = new THREE.Color();
+
+				var n = 1000, n2 = n / 2; // particles spread in the cube
+
+				for ( var i = 0; i < particles; i += 3 ) {
+
+					// positions
+
+					var x = Math.random() * n - n2;
+					var y = Math.random() * n - n2;
+					var z = Math.random() * n - n2;
+
+					positions[ i ]     = coordinates[i][0];
+					positions[ i + 1 ] = coordinates[i][1];
+					positions[ i + 2 ] = coordinates[i][2];
+
+					// colors
+
+					var vx = ( x / n ) + 0.5;
+					var vy = ( y / n ) + 0.5;
+					var vz = ( z / n ) + 0.5;
+
+					color.setRGB( vx, vy, vz );
+
+					colors[ i ]     = color.r;
+					colors[ i + 1 ] = color.g;
+					colors[ i + 2 ] = color.b;
+
+				}
+
+				var edgesGeometry = new THREE.Geometry();
+
+				for ( var i = 0; i < edges.length; i ++ ) {
+
+					particle = new THREE.Sprite( material );
+					edge = edges[i];
+					startNode = coordinates[parseInt(edge[0])]
+					endNode = coordinates[parseInt(edge[1])]
+					particle.position.x = startNode[0];
+					particle.position.y = startNode[1];
+					particle.position.z = startNode[2];
+					particle.position.normalize();
+					particle.position.multiplyScalar( Math.random() * 10 + 450 );
+					particle.scale.x = particle.scale.y = 10;
+					scene.add( particle );
+
+					edgesGeometry.vertices.push( particle.position );
+
+
+
+					particle = new THREE.Sprite( material );
+					
+					particle.position.x = endNode[0];
+					particle.position.y = endNode[1];
+					particle.position.z = endNode[2];
+					particle.position.normalize();
+					particle.position.multiplyScalar( Math.random() * 10 + 450 );
+					particle.scale.x = particle.scale.y = 10;
+					scene.add( particle );
+
+					edgesGeometry.vertices.push( particle.position );
+
+				}
+
+
+				var line = new THREE.Line( edgesGeometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } ) ,THREE.LinePieces);
+				//scene.add( line );
+
+
+
+				geometry.computeBoundingSphere();
+
+				//
+
+				var material = new THREE.ParticleSystemMaterial( { size: 1, vertexColors: true } );
+
+				particleSystem = new THREE.ParticleSystem( geometry, material );
+				scene.add( particleSystem );
+
+				//
+
+				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				renderer.setClearColor( scene.fog.color, 1 );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				container.appendChild( renderer.domElement );
+
+				//
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+
+				//
+				
+				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener('keydown',onDocumentKeyDown,false);
+
+				
+
+			}
+			function onDocumentKeyDown( event ) {
+
+				if (event.keyCode == 32)
+				        isSpaceDown = !isSpaceDown;
+			}
+
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+			function onDocumentMouseMove(event) {
+
+				mouseX = event.clientX -windowHalfX;
+				mouseY = event.clientY -windowHalfY;
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				stats.update();
+
+			}
+
+			function render() {
+
+				var time = Date.now() * 0.001;
+
+				if(isSpaceDown){
+					particleSystem.rotation.y = time * 0.25;
+				}
+
+
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Visualisation of the brain!</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #cccccc;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+
+				background-color: #050505;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+
+			a {
+
+				color: #0080ff;
+			}
+		</style>
+	</head>
+	<body>
+	
+	<div id="inputs" class="clearfix">
+        Please wait while the data is loading!
+    </div>
+
+	<div id="container"></div>
+
+	<script src="three.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+	<script src="js/Detector.js"></script>
+	<script src="js/libs/stats.min.js"></script>  
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="js/libs/dat.gui.min.js"></script>
+
+    <script>
+
+		if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+		var container, stats;
+
+		var camera, scene, renderer;
+
+		var mesh;
+		var mouseX = 0, mouseY = 0;
+		var windowHalfX, windowHalfY;
+		var controls;
+		var isSpaceDown = false;
+		var knownBrainEdges = new Array();
+		var totalClusters = 0;
+		
+
+        $(document).ready(function() {
+            inputs.innerHTML = "Started loading edges!";
+  		     var httpRequest = new XMLHttpRequest();
+		            httpRequest.onreadystatechange = function() {
+		                processEdgesContent(httpRequest);
+		            }
+		            // Send the request
+		            httpRequest.open("POST", 'edgesCoordinates.csv', true);
+		            httpRequest.send(null);
+				    
+		 });
+
+        function processEdgesContent(httpRequest){
+            console.log("proecessing edges");
+            var edges = new Array();
+            if (httpRequest.readyState == 4){
+                // everything is good, the response is received
+                if ((httpRequest.status == 200) || (httpRequest.status == 0)){
+                    // Analys the contents using the stats library
+                    // and display the results
+                    CSVContents = httpRequest.responseText;
+                    console.log(CSVContents);
+                     var data = $.csv.toArrays(CSVContents);
+                     
+				     for(var row=1; row < data.length; row++) {
+				      	edges[row-1] = new Array();
+					    edges[row-1][0] = data[row][0] //xstart
+					    edges[row-1][1] = data[row][1] //ystart
+					    edges[row-1][2] = data[row][2] //zstart
+					    edges[row-1][3] = data[row][3] //xend
+					    edges[row-1][4] = data[row][4] //yend
+					    edges[row-1][5] = data[row][5] //zend
+					    edges[row-1][6] = data[row][6] //color
+					    totalClusters = Math.max(totalClusters,data[row][6]);
+
+					    
+				      }
+				      inputs.innerHTML = "Done loading edges!";
+				     knownBrainEdges = edges;
+				     init();
+					animate();
+                } else {
+                alert(' => There was a problem with the request. ' 
+                        + httpRequest.status + httpRequest.responseText);
+                }
+            }
+        }
+
+			
+    
+			var VariableParameters = function() {
+			  this.message = 'something something';
+			  this.speed = 0.8;
+			  this.minimumCluster = 0;
+			  this.maximumCluster = 0;
+			  this.displayOutline = false;
+			};
+			
+
+			var text = new VariableParameters();
+			var line;
+			var edgesGeometry;
+			var allLines = [];
+			var gui;
+
+			var uniforms, attributes;
+			function init() {
+				container = document.getElementById( 'container' );
+				inputs.innerHTML = "started rendering edges!";
+				
+				text.maximumCluster = totalClusters;
+				// Add the changable parameters					
+				gui = new dat.GUI();
+				var f2 = gui.addFolder('Min and max clusters');
+				var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
+				var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
+				f2.open();
+				
+
+				maxController.onChange(function (value) {
+				 	if (text.minimumCluster > value)
+				 	{
+				 		text.minimumCluster = value;
+				 	}
+				});
+
+				minController.onChange(function (value) {
+				 	if (text.maximumCluster < value)
+				 	{
+				 		text.maximumCluster = value;
+				 	}
+				});
+				
+				// Add the camera
+				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
+				camera.position.z = 250;
+				camera.position.y = -50;
+
+				// Set the scene
+				scene = new THREE.Scene();
+				scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+
+				// Add the controls
+  				controls = new THREE.OrbitControls( camera ,document.getElementById('container'));
+  				controls.addEventListener( 'change', render );
+
+				
+				var groupColors = [];
+				var geometryPerCluster = [];
+
+				var particles = new THREE.Geometry();
+				var pMaterial = new THREE.ParticleSystemMaterial({size: 1,});
+
+
+				// Initialise the clusters
+				for (var i = 0; i < totalClusters+1; i++)
+				{
+					geometryPerCluster[i] = new THREE.Geometry();
+					groupColors[i] = []
+				}
+
+				for ( var i = 0; i < knownBrainEdges.length; i ++ ) {
+					edge = knownBrainEdges[i];
+					var material ;//= pMaterial;
+					particle = new THREE.Sprite( material );
+					particle.position.x = edge[0];
+					particle.position.y = edge[1];
+					particle.position.z = edge[2];
+					geometryPerCluster[edge[6]].vertices.push( particle.position );
+
+					particle = new THREE.Sprite( material );
+					particle.position.x = edge[3];
+					particle.position.y = edge[4];
+					particle.position.z = edge[5];
+					geometryPerCluster[edge[6]].vertices.push( particle.position );					
+
+					var color = new THREE.Color( 0xffffff );
+					color.setHSL( edge[6] / totalClusters, 2.0, 0.5 );
+					groupColors[edge[6]].push(color);
+					groupColors[edge[6]].push(color);
+					
+      				particle = new THREE.Vector3(edge[3], edge[4], edge[5]);
+      					
+					particles.vertices.push(particle);
+					
+				}
+			
+				// Add all particles
+				var geometry = new THREE.Geometry();
+				var particleSystem = new THREE.ParticleSystem(particles,pMaterial);
+				scene.add(particleSystem);
+
+
+				
+				// Add a color to each group of vertexes and add them to the scene
+				for (var i = 0; i < totalClusters; i++)
+				{
+					geometryPerCluster[i].colors = groupColors[i];
+					var lineMaterial = new THREE.LineBasicMaterial( { vertexColors: geometryPerCluster[i].colors ,linewidth:1 });
+					allLines[i] = new THREE.Line( geometryPerCluster[i], lineMaterial ,THREE.LinePieces);
+					allLines[i].visible = true;
+					scene.add( allLines[i] );
+				}
+
+				// Update our message at the top
+				inputs.innerHTML = "Done rendering edges";
+
+				//Set the renderer
+				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				renderer.setClearColor( scene.fog.color, 1 );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				// Do something with stats
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+				requestAnimationFrame( animate );
+
+				// Render and animate
+				render();
+				stats.update();
+				animate();
+
+				// Add window listeners
+				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener('keydown',onDocumentKeyDown,false);
+
+				render();
+				stats.update();
+				animate();
+			}
+
+			function onDocumentKeyDown( event ) {
+				//if (event.keyCode == 32) // Spacebar
+			}
+
+
+			function onWindowResize() {
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentMouseMove(event) {
+				mouseX = event.clientX -windowHalfX;
+				mouseY = event.clientY -windowHalfY;
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+				stats.update();
+			}
+
+			function render() {
+				// change the visibility of the clusters
+				for (var i = 0; i < totalClusters; i++)
+				{
+					if (i >= text.minimumCluster && i <= text.maximumCluster)
+					{
+						allLines[i].visible = true;
+					}
+					else
+					{
+						allLines[i].visible = false;
+					}
+				}
+				renderer.render( scene, camera );
+			}
+
+		</script>
+
+	</body>
+</html>
