@@ -83,7 +83,7 @@
       scene = new THREE.Scene();
 
       camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
-      camera.position.set(3, 10, 0);
+      camera.position.set(-10, 0, 50);
       scene.add(camera);
 
       controls = new THREE.OrbitControls(camera, element);
@@ -115,6 +115,7 @@
       var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
       scene.add(light);
 
+        /*
       var texture = THREE.ImageUtils.loadTexture(
         'textures/patterns/checker.png'
       );
@@ -135,7 +136,7 @@
 
       var mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -Math.PI / 2;
-      scene.add(mesh);
+      scene.add(mesh);*/
         
        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
         var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
