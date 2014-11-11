@@ -37,13 +37,15 @@
 
     <script src="three.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script src="StereoEffect.js"></script>
     <script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/libs/stats.min.js"></script>
-    <script src="DeviceOrientationControls.js"></script>
     <script src="js/controls/OrbitControls.js"></script>
     <script src="js/libs/dat.gui.min.js"></script>
+    <script src="brainvis.js"></script>
+    <script src="StereoEffect.js"></script>
+    <script src="DeviceOrientationControls.js"></script>
+
 
     <script>
         if (!Detector.webgl) Detector.addGetWebGLMessage();
@@ -60,9 +62,8 @@
         var isSpaceDown = false;
         var knownBrainEdges = new Array();
         var totalClusters = 0;
-
         var effect;
-        
+
         $(document).ready(function() {
             inputs.innerHTML = "Started loading edges!";
             var httpRequest = new XMLHttpRequest();
@@ -72,56 +73,12 @@
                 // Send the request
             httpRequest.open("GET", 'edgesCoordinates.csv', true);
             httpRequest.send(null);
-
+            
         });
 
-        function processEdgesContent(httpRequest) {
-            console.log("proecessing edges");
-            var edges = new Array();
-            if (httpRequest.readyState == 4) {
-                // everything is good, the response is received
-                if ((httpRequest.status == 200) || (httpRequest.status == 0)) {
-                    // Analys the contents using the stats library
-                    // and display the results
-                    CSVContents = httpRequest.responseText;
-                    console.log(CSVContents);
-                    var data = $.csv.toArrays(CSVContents);
+       
 
-                    for (var row = 1; row < data.length; row++) {
-                        edges[row - 1] = new Array();
-                        edges[row - 1][0] = data[row][0] //xstart
-                        edges[row - 1][1] = data[row][1] //ystart
-                        edges[row - 1][2] = data[row][2] //zstart
-                        edges[row - 1][3] = data[row][3] //xend
-                        edges[row - 1][4] = data[row][4] //yend
-                        edges[row - 1][5] = data[row][5] //zend
-                        edges[row - 1][6] = data[row][6] //color
-                        totalClusters = Math.max(totalClusters, data[row][6]);
-
-
-                    }
-                    inputs.innerHTML = "Done loading edges!";
-                    knownBrainEdges = edges;
-                    init();
-                    animate();
-                } else {
-                    alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
-                }
-            }
-        }
-
-
-
-        var VariableParameters = function() {
-            this.message = 'something something';
-            this.speed = 0.8;
-            this.minimumCluster = 0;
-            this.maximumCluster = 0;
-            this.displayOutline = false;
-        };
-
-
-        var text = new VariableParameters();
+        var text = new VariableParametersBrainVisualisation();
         var line;
         var edgesGeometry;
         var allLines = [];
@@ -132,9 +89,7 @@
         function init() {
             container = document.getElementById('container');
             inputs.innerHTML = "started rendering edges!";
-            
-            
-            
+
             text.maximumCluster = totalClusters;
             // Add the changable parameters					
             gui = new dat.GUI();
@@ -157,9 +112,7 @@
             });
 
             // Add the camera
-            camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500);
-            camera.position.z = 250;
-            camera.position.y = -50;
+            camera = getCamera();
 
             // Set the scene
             scene = new THREE.Scene();
@@ -168,14 +121,33 @@
             // Add the controls
             controls = new THREE.OrbitControls(camera, document.getElementById('container'));
             controls.addEventListener('change', render);
-
-
-            var groupColors = [];
+            
+            // Needed for the particles
+            var PI2 = Math.PI * 2;
+            var program = function ( context )
+            {
+                context.beginPath();
+                context.arc( 0, 0, 1, 0, PI2, true );
+                context.closePath();
+                context.fill();    
+            };
+            
             var geometryPerCluster = [];
-
+            var groupColors = [];
             var particles = new THREE.Geometry();
-            var pMaterial = new THREE.ParticleSystemMaterial({
+            /*var pMaterial = new THREE.ParticleSystemMaterial({
                 size: 1,
+                color: Math.random() * 0x808008 + 0x808080
+            });*/
+            
+            var pMaterial = new THREE.PointCloudMaterial({
+              color: 0xFFFFFF,
+              size: 1,
+              map: THREE.ImageUtils.loadTexture(
+                "particle.png"
+              ),
+              blending: THREE.AdditiveBlending,
+              transparent: true
             });
 
 
@@ -184,46 +156,26 @@
                 geometryPerCluster[i] = new THREE.Geometry();
                 groupColors[i] = []
             }
-
-            for (var i = 0; i < knownBrainEdges.length; i++) {
-                edge = knownBrainEdges[i];
-                var material; //= pMaterial;
-                particle = new THREE.Sprite(material);
-                particle.position.x = edge[0];
-                particle.position.y = edge[1];
-                particle.position.z = edge[2];
-                geometryPerCluster[edge[6]].vertices.push(particle.position);
-
-                particle = new THREE.Sprite(material);
-                particle.position.x = edge[3];
-                particle.position.y = edge[4];
-                particle.position.z = edge[5];
-                geometryPerCluster[edge[6]].vertices.push(particle.position);
-
-                var color = new THREE.Color(0xffffff);
-                color.setHSL(edge[6] / totalClusters, 2.0, 0.5);
-                groupColors[edge[6]].push(color);
-                groupColors[edge[6]].push(color);
-
-                particle = new THREE.Vector3(edge[3], edge[4], edge[5]);
-
-                particles.vertices.push(particle);
-
-            }
+            
+            // Process all particles in the brainvis library
+            processParticles(geometryPerCluster, groupColors, particles);
 
             // Add all particles
             var geometry = new THREE.Geometry();
             var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
-            scene.add(particleSystem);
+            scene.add(particleSystem, groupColors);
 
 
-
+            
             // Add a color to each group of vertexes and add them to the scene
             for (var i = 0; i < totalClusters; i++) {
                 geometryPerCluster[i].colors = groupColors[i];
                 var lineMaterial = new THREE.LineBasicMaterial({
                     vertexColors: geometryPerCluster[i].colors,
-                    linewidth: 1
+                    linewidth: 1,
+                    opacity: 0.4, 
+                    blending: THREE.AdditiveBlending, 
+                    transparent: true
                 });
                 allLines[i] = new THREE.Line(geometryPerCluster[i], lineMaterial, THREE.LinePieces);
                 allLines[i].visible = true;
@@ -241,7 +193,8 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
             effect = new THREE.StereoEffect(renderer);
-            
+
+
             // Do something with stats
             stats = new Stats();
             stats.domElement.style.position = 'absolute';
@@ -258,27 +211,12 @@
             window.addEventListener('resize', onWindowResize, false);
             window.addEventListener('keydown', onDocumentKeyDown, false);
 
-            
-
-              function setOrientationControls(e) {
-                if (!e.alpha) {
-                  return;
-                }
-
-                controls = new THREE.DeviceOrientationControls(camera, true);
-                controls.connect();
-                controls.update();
-
-                element.addEventListener('click', fullscreen, false);
-
-                window.removeEventListener('deviceorientation', setOrientationControls);
-              }
-              window.addEventListener('deviceorientation', setOrientationControls, true);
-
-
             render();
             stats.update();
             animate();
+            render();
+            console.log("now done with everything!");
+            
         }
 
         function onDocumentKeyDown(event) {
@@ -295,6 +233,7 @@
 
             renderer.setSize(window.innerWidth, window.innerHeight);
             effect.setSize(window.innerWidth, window.innerHeight);
+
         }
 
         function onDocumentMouseMove(event) {
@@ -309,6 +248,7 @@
         }
 
         function render() {
+            console.log("Rendering");
             // change the visibility of the clusters
             for (var i = 0; i < totalClusters; i++) {
                 if (i >= text.minimumCluster && i <= text.maximumCluster) {
@@ -318,7 +258,7 @@
                 }
             }
             //renderer.render(scene, camera);
-            effect.render(scene,camera);
+            effect.render(scene, camera);
         }
     </script>
 
