@@ -118,8 +118,16 @@
             // Add the controls
             controls = new THREE.OrbitControls(camera, document.getElementById('container'));
             controls.addEventListener('change', render);
-
-
+            
+            // Needed for the particles
+            var PI2 = Math.PI * 2;
+            var program = function ( context )
+            {
+                context.beginPath();
+                context.arc( 0, 0, 1, 0, PI2, true );
+                context.closePath();
+                context.fill();    
+            };
             
             var geometryPerCluster = [];
             var groupColors = [];
@@ -129,7 +137,7 @@
                 color: Math.random() * 0x808008 + 0x808080
             });*/
             
-            var pMaterial = new THREE.ParticleSystemMaterial({
+            var pMaterial = new THREE.PointCloudMaterial({
               color: 0xFFFFFF,
               size: 1,
               map: THREE.ImageUtils.loadTexture(
