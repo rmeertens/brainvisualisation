@@ -69,7 +69,7 @@
                 processCSVContents(httpRequest,edgesFilename);
             }
             // Send the request
-            httpRequest.open("POST", CSVfileName, true);
+            httpRequest.open("GET", CSVfileName, true);
             httpRequest.send(null);
 
            
@@ -99,7 +99,7 @@
 		                processEdgesContent(httpRequest,coordinates);
 		            }
 		            // Send the request
-		            httpRequest.open("POST", edgesFilename, true);
+		            httpRequest.open("GET", edgesFilename, true);
 		            httpRequest.send(null);
 				    
 	                console.log(" => Response status: " + httpRequest.status)
