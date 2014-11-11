@@ -202,6 +202,25 @@
             // Update our message at the top
             inputs.innerHTML = "Done rendering edges";
             
+            
+            
+            //Set the renderer
+            renderer = new THREE.WebGLRenderer({
+                antialias: false
+            });
+            renderer.setClearColor(scene.fog.color, 1);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            effect = new THREE.StereoEffect(renderer);
+            
+            // Do something with stats
+            stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            container.appendChild(stats.domElement);
+            requestAnimationFrame(animate);
+
+            
             // Add a floor and a light 
               var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
               scene.add(light);
@@ -230,22 +249,7 @@
             // End of adding a floor and a light
             
             
-            //Set the renderer
-            renderer = new THREE.WebGLRenderer({
-                antialias: false
-            });
-            renderer.setClearColor(scene.fog.color, 1);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-            effect = new THREE.StereoEffect(renderer);
             
-            // Do something with stats
-            stats = new Stats();
-            stats.domElement.style.position = 'absolute';
-            stats.domElement.style.top = '0px';
-            container.appendChild(stats.domElement);
-            requestAnimationFrame(animate);
-
             // Render and animate
             render();
             stats.update();
