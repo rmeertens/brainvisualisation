@@ -44,8 +44,9 @@ var VariableParametersBrainVisualisation = function() {
 function getCamera()
 {
     camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500);
-            camera.position.z = 250;
-            camera.position.y = -50;
+    camera.position.x = -52;
+    camera.position.z = 200;
+    camera.position.y = 16;
     return camera;
 }
 
