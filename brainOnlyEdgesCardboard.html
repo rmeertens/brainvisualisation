@@ -45,7 +45,7 @@
     <script src="brainvis.js"></script>
     <script src="StereoEffect.js"></script>
     <script src="DeviceOrientationControls.js"></script>
-
+  
 
     <script>
         if (!Detector.webgl) Detector.addGetWebGLMessage();
@@ -62,7 +62,7 @@
         var isSpaceDown = false;
         var knownBrainEdges = new Array();
         var totalClusters = 0;
-        var effect;
+
 
         $(document).ready(function() {
             inputs.innerHTML = "Started loading edges!";
@@ -192,8 +192,6 @@
             renderer.setClearColor(scene.fog.color, 1);
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
-            effect = new THREE.StereoEffect(renderer);
-
 
             // Do something with stats
             stats = new Stats();
@@ -232,7 +230,6 @@
             camera.updateProjectionMatrix();
 
             renderer.setSize(window.innerWidth, window.innerHeight);
-            effect.setSize(window.innerWidth, window.innerHeight);
 
         }
 
@@ -258,7 +255,6 @@
                 }
             }
             renderer.render(scene, camera);
-            //effect.render(scene, camera);
         }
     </script>
 
