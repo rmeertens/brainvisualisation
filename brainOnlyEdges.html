@@ -34,8 +34,9 @@
     </div>
 
     <div id="container"></div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    
     <script src="three.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
     <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
     <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
@@ -53,7 +54,7 @@
 
         var camera, scene, renderer;
 
-        var mesh;
+        
         var mouseX = 0,
             mouseY = 0;
         var windowHalfX, windowHalfY;
@@ -61,6 +62,15 @@
         var isSpaceDown = false;
         var knownBrainEdges = new Array();
         var totalClusters = 0;
+
+        
+        var text = new VariableParametersBrainVisualisation();
+        var line;
+        var edgesGeometry;
+        var allLines = [];
+        var gui;
+
+        var uniforms, attributes;
 
 
         $(document).ready(function() {
@@ -75,17 +85,6 @@
             
         });
 
-       
-
-        var text = new VariableParametersBrainVisualisation();
-        var line;
-        var edgesGeometry;
-        var allLines = [];
-        var gui;
-
-        var uniforms, attributes;
-
-        
         function generateControllerUpperRight()
         {
             gui = new dat.GUI();
@@ -198,11 +197,9 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // Do something with stats
-            stats = new Stats();
-            stats.domElement.style.position = 'absolute';
-            stats.domElement.style.top = '0px';
-            container.appendChild(stats.domElement);
+            // Do something with statistics showing the frames per second
+            initialiseStatistics();
+            
             requestAnimationFrame(animate);
 
             // Render and animate
@@ -221,7 +218,14 @@
             console.log("now done with everything!");
             
         }
-
+        
+        function initialiseStatistics()
+        {
+            stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            container.appendChild(stats.domElement);
+        }
         function onDocumentKeyDown(event) {
             //if (event.keyCode == 32) // Spacebar
         }
