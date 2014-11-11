@@ -88,6 +88,7 @@
 
         function init() {
             container = document.getElementById('container');
+            container.addEventListener('click', fullscreen, false);
             inputs.innerHTML = "started rendering edges!";
 
             text.maximumCluster = totalClusters;
@@ -260,6 +261,18 @@
             }
             //renderer.render(scene, camera);
             effect.render(scene, camera);
+        }
+        function fullscreen() {
+            console.log("Setting fullscreen");
+          if (container.requestFullscreen) {
+            container.requestFullscreen();
+          } else if (container.msRequestFullscreen) {
+            container.msRequestFullscreen();
+          } else if (container.mozRequestFullScreen) {
+            container.mozRequestFullScreen();
+          } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+          }
         }
     </script>
 
