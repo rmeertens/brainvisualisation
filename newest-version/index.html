@@ -52,7 +52,9 @@
       var allLines = [];
     var totalClusters = 0;         
 
-
+    var locationMiddleX = 0;
+    var locationMiddleY = 0;
+      var locationMiddleZ = 85;
 
     var clock = new THREE.Clock();
 
@@ -114,7 +116,7 @@
 
       var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
       scene.add(light);
-
+/*
       var texture = THREE.ImageUtils.loadTexture(
         'textures/patterns/checker.png'
       );
@@ -136,10 +138,15 @@
       var mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -Math.PI / 2;
       scene.add(mesh);
+      */
         
        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
         var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
         var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2.position.x = locationMiddleX;
+        cube2.position.y = locationMiddleY;
+        cube2.position.z = locationMiddleZ;
         scene.add( cube2 );
 
         
