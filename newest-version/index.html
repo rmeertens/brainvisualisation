@@ -54,12 +54,12 @@
     var totalClusters = 0;         
 
     var text = new VariableParametersBrainVisualisation();
-
+var cube2;
 
     var clock = new THREE.Clock();
     var locationMiddleX = 0;
-    var locationMiddleY = 10;
-      var locationMiddleZ = 75;
+    var locationMiddleY = 0;
+      var locationMiddleZ = 85;
     //init();
     //animate();
     
@@ -97,6 +97,8 @@
       controls.target.set(
         locationMiddleX,locationMiddleY,locationMiddleZ
       );
+        controls.autoRotate = true;
+
       controls.noZoom = true;
       controls.noPan = true;
 
@@ -146,7 +148,7 @@
         */
        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
         var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
-        var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
         cube2.position.x = locationMiddleX;
         cube2.position.y = locationMiddleY;
         cube2.position.z = locationMiddleZ;
@@ -253,11 +255,11 @@
     }
 
     function render(dt) {
-         //var timer = new Date().getTime() * 0.0005;
+        camera.lookAt( cube2.position );
+  //       var timer = new Date().getTime() * 0.0005;
  
-        //camera.position.x = Math.floor(Math.cos( timer ) * 100);
-        //camera.position.z = Math.floor(Math.sin( timer ) * 50 + 50);
- 
+ //       camera.position.x = Math.floor(Math.cos( timer ) * 10);
+//        camera.position.z = Math.floor(Math.sin( timer ) * 10);
       effect.render(scene, camera);
     }
 
