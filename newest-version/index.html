@@ -197,6 +197,15 @@ var cube2;
         
         
       window.addEventListener('resize', resize, false);
+      window.setInterval(function(){
+            /// call your function here
+          var randomNumer = Math.floor(Math.random()*10);
+            console.log(randomNumer);
+            text.minimumCluster = randomNumer;
+          var randomNumer = Math.floor(Math.random()*10);
+            console.log(randomNumer);
+          text.maximumCluster = randomNumer;
+        }, 1000);
       setTimeout(resize, 1);
     }
        function generateControllerUpperRight()
@@ -256,15 +265,15 @@ var cube2;
 
     function render(dt) {
      //   camera.lookAt( cube2.position );
-        /*
+        
         for (var i = 0; i < totalClusters; i++) {
                 if (i >= text.minimumCluster && i <= text.maximumCluster) {
                     allLines[i].visible = true;
                 } else {
                     allLines[i].visible = false;
                 }
-            }*/
-  //       var timer = new Date().getTime() * 0.0005;
+        }
+  //      var timer = new Date().getTime() * 0.0005;
  
  //       camera.position.x = Math.floor(Math.cos( timer ) * 10);
 //        camera.position.z = Math.floor(Math.sin( timer ) * 10);
