@@ -97,7 +97,7 @@ var cube2;
       controls.target.set(
         locationMiddleX,locationMiddleY,locationMiddleZ
       );
-        controls.autoRotate = true;
+        //controls.autoRotate = true;
 
       controls.noZoom = true;
       controls.noPan = true;
@@ -255,7 +255,15 @@ var cube2;
     }
 
     function render(dt) {
-        camera.lookAt( cube2.position );
+     //   camera.lookAt( cube2.position );
+        /*
+        for (var i = 0; i < totalClusters; i++) {
+                if (i >= text.minimumCluster && i <= text.maximumCluster) {
+                    allLines[i].visible = true;
+                } else {
+                    allLines[i].visible = false;
+                }
+            }*/
   //       var timer = new Date().getTime() * 0.0005;
  
  //       camera.position.x = Math.floor(Math.cos( timer ) * 10);
