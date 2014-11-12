@@ -57,7 +57,7 @@
       var locationMiddleZ = 85;
 
     var clock = new THREE.Clock();
-
+      var mesh;
     //init();
     //animate();
     
@@ -116,7 +116,7 @@
 
       var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
       scene.add(light);
-/*
+
       var texture = THREE.ImageUtils.loadTexture(
         'textures/patterns/checker.png'
       );
@@ -135,10 +135,11 @@
 
       var geometry = new THREE.PlaneGeometry(1000, 1000);
 
-      var mesh = new THREE.Mesh(geometry, material);
+      mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = -30;
       scene.add(mesh);
-      */
+      
         
        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
         var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
