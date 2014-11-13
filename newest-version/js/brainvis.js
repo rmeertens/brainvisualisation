@@ -65,7 +65,7 @@ function processParticles(geometryPerCluster, groupColors, particles)
                 particle.position.x = edge[3];
                 particle.position.y = edge[4];
                 particle.position.z = edge[5];
-                geometryPerCluster[edge[6]].vertices.push(particle.position);
+    geometryPerCluster[edge[6]].vertices.push(particle.position);
 
                 var color = new THREE.Color(0xffffff);
                 color.setHSL(edge[6] / totalClusters, 2.0, 0.5);
