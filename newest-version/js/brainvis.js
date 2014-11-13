@@ -4,8 +4,6 @@ function processEdgesContent(httpRequest) {
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-            // Analys the contents using the stats library
-            // and display the results
             CSVContents = httpRequest.responseText;
             console.log(CSVContents);
             var data = $.csv.toArrays(CSVContents);
@@ -18,20 +16,47 @@ function processEdgesContent(httpRequest) {
 			    edges[row-1][4] = data[row][4] //yend
 			    edges[row-1][5] = data[row][5] //zend
 			    edges[row-1][6] = data[row][6] //color
-			    totalClusters = Math.max(totalClusters,data[row][6]);
-
-					    
+			    totalClusters = Math.max(totalClusters,data[row][6]);				    
 			}
 			inputs.innerHTML = "Done loading edges!";
 			knownBrainEdges = edges;
 			init();
 			animate();
         }
-            else {
-                alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
-                }
-            }
+        else {
+            alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
         }
+    }
+}
+
+function processNodesContent(httpRequest) {
+    console.log("proecessing nodes?");
+    var nodes = new Array();
+    if (httpRequest.readyState === 4){
+        // everything is good, the response is received
+        if ((httpRequest.status == 200) || (httpRequest.status == 0)){
+            console.log("Really processing nodes");
+            // Add each node to a list of lists
+            CSVContents = httpRequest.responseText;
+            var data = $.csv.toArrays(CSVContents);
+            for(var row=1; row < data.length; row++) {
+			   	nodes[row-1] = new Array();
+			    nodes[row-1][0] = data[row][1] //x
+			    nodes[row-1][1] = data[row][2] //y
+			    nodes[row-1][2] = data[row][3] //z	    
+			}
+			inputs.innerHTML = "Done loading nodes!";
+			knownBrainNodes = nodes;
+            initialisedNodes=true;
+			init();
+        }
+        else {
+            alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
+        }
+    }
+}
+
+
  // The variables used in the overlay with options
 var VariableParametersBrainVisualisation = function() {
     this.message = 'something something';

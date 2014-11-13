@@ -181,6 +181,7 @@
         
             // Add a color to each group of vertexes and add them to the scene
             for (var i = 0; i < totalClusters; i++) {
+                
                 geometryPerCluster[i].colors = groupColors[i];
                 var lineMaterial = new THREE.LineBasicMaterial({
                     vertexColors: geometryPerCluster[i].colors,
@@ -219,13 +220,6 @@
     }
 
     function render(dt) {
-        for (var i = 0; i < totalClusters; i++) {
-                if (i >= text.minimumCluster && i <= text.maximumCluster) {
-                    allLines[i].visible = true;
-                } else {
-                    allLines[i].visible = false;
-                }
-            }
         renderer.render(scene, camera);
     }
 
