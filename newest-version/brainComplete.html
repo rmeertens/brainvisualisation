@@ -52,6 +52,7 @@
         mouseY = 0;
     var windowHalfX, windowHalfY;
     var knownBrainEdges = new Array();
+      var knownNodes = new Array();
       var allLines = [];
     var totalClusters = 0;         
 
@@ -74,6 +75,15 @@
         httpRequest.open("GET", 'edgesCoordinates.csv', true);
         httpRequest.send(null);
 
+        
+        
+        var httpRequest2 = new XMLHttpRequest();
+        httpRequest2.onreadystatechange = function() {
+                processNodesContent(httpRequest2);
+            }
+            // Send the request
+        httpRequest2.open("GET", 'node1sup.csv', true);
+        httpRequest2.send(null);
     }); 
 
       function generateControllerUpperRight()
