@@ -31,16 +31,16 @@ function processEdgesContent(httpRequest) {
 
 function processNodesContent(httpRequest) {
     console.log("proecessing nodes?");
-    var nodes = new Array();
+    
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
             var geometry3 = new THREE.BoxGeometry( 1, 1, 1 ); 
-        var material3 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
-            var collectionBrainCoordinates;
+            var material3 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+            
             var geometryPerCluster = [];
             var groupColors = [];
-            var collectionBrainCoordinates = new THREE.Geometry();
+            
             var pMaterial = new THREE.ParticleSystemMaterial({
                 size: 0.5,
                 color: 0xffffff
@@ -56,17 +56,13 @@ function processNodesContent(httpRequest) {
             // Add each node to a list of lists
             CSVContents = httpRequest.responseText;
             var data = $.csv.toArrays(CSVContents);
+            var nodes = new Array();
             for(var row=1; row < data.length; row++) {
 			   	nodes[row-1] = new Array();
 			    nodes[row-1][0] = data[row][1] //x
 			    nodes[row-1][1] = data[row][2] //y
 			    nodes[row-1][2] = data[row][3] //z	
-                 /*var cube3 = new THREE.Mesh( geometry3, material3 ); 
-        cube3 = new THREE.Mesh( geometry3, material3 ); 
-        cube3.position.x = data[row][1];
-        cube3.position.y = data[row][2];
-        cube3.position.z = data[row][3];
-        scene.add( cube3 );*/
+                
                 particle = new THREE.Vector3(data[row][1],data[row][2],data[row][3]);
                     collectionBrainCoordinates.vertices.push(particle);
 			}
