@@ -20,6 +20,7 @@ function processEdgesContent(httpRequest) {
 			}
 			inputs.innerHTML = "Done loading edges!";
 			knownBrainEdges = edges;
+            initialisedEdges=true;
 			init();
 			animate();
         }
@@ -35,49 +36,23 @@ function processNodesContent(httpRequest) {
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-            var geometry3 = new THREE.BoxGeometry( 1, 1, 1 ); 
-            var material3 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
             
-            var geometryPerCluster = [];
-            var groupColors = [];
-            
-            var pMaterial = new THREE.ParticleSystemMaterial({
-                size: 0.5,
-                color: 0xffffff
-            });
-             // Initialise the clusters
-            for (var i = 0; i < totalClusters + 1; i++) {
-                geometryPerCluster[i] = new THREE.Geometry();
-                groupColors[i] = []
-            }
             
             
             console.log("Really processing nodes");
             // Add each node to a list of lists
             CSVContents = httpRequest.responseText;
             var data = $.csv.toArrays(CSVContents);
-            var nodes = new Array();
             for(var row=1; row < data.length; row++) {
 			   	nodes[row-1] = new Array();
 			    nodes[row-1][0] = data[row][1] //x
 			    nodes[row-1][1] = data[row][2] //y
 			    nodes[row-1][2] = data[row][3] //z	
-                
-                particle = new THREE.Vector3(data[row][1],data[row][2],data[row][3]);
-                    collectionBrainCoordinates.vertices.push(particle);
 			}
 			inputs.innerHTML = "Done loading nodes!";
 			knownBrainNodes = nodes;
             initialisedNodes=true;
-			//init();
-             
-
-            // Add all particles
-            var geometry = new THREE.Geometry();
-            var particleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
-            scene.add(particleSystem, groupColors);
-                    
-        
+			init();
         }
         else {
             alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);

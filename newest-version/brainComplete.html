@@ -60,11 +60,11 @@
     var locationMiddleY = 0;
     var locationMiddleZ = 65;
     var collectionBrainCoordinates = new THREE.Geometry();
-
+    var nodes = new Array();
     var clock = new THREE.Clock();
       var mesh;
-    //init();
-    //animate();
+      var initialisedNodes=false;
+      var initialisedEdges=false;
     
     $(document).ready(function() {
         inputs.innerHTML = "Started loading edges!";
@@ -111,6 +111,10 @@
         }
       
     function init() {
+        if(!(initialisedEdges && initialisedNodes))
+           {
+return;
+           }
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
       container = document.getElementById('example');
@@ -191,6 +195,34 @@
             }
         
       window.addEventListener('resize', resize, false);
+        
+        // Add all nodes
+        var geometry3 = new THREE.BoxGeometry( 1, 1, 1 ); 
+            var material3 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+            
+            var geometryPerCluster = [];
+            var groupColors = [];
+            
+            var pMaterial = new THREE.ParticleSystemMaterial({
+                size: 0.5,
+                color: 0xffffff
+            });
+             // Initialise the clusters
+            for (var i = 0; i < totalClusters + 1; i++) {
+                geometryPerCluster[i] = new THREE.Geometry();
+                groupColors[i] = []
+            }
+        for(var row=0;row<nodes.length;row++)
+        {
+            particle = new THREE.Vector3(nodes[row][0],nodes[row][1],nodes[row][2]);
+                    collectionBrainCoordinates.vertices.push(particle);
+        }
+        // Add all particles
+            var geometry = new THREE.Geometry();
+            var particleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
+            scene.add(particleSystem, groupColors);
+        
+        
       setTimeout(resize, 1);
     }
 
