@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Visualisation of the brain!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: #cccccc;
+            font-family: Monospace;
+            font-size: 13px;
+            text-align: center;
+            background-color: #050505;
+            margin: 0px;
+            overflow: hidden;
+        }
+        #info {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            padding: 5px;
+        }
+        a {
+            color: #0080ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="inputs" class="clearfix">
+        Please wait while the data is loading!
+    </div>
+
+    <div id="container"></div>
+    
+    <script src="three.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+    <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
+    <script src="js/Detector.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="js/libs/dat.gui.min.js"></script>
+    <script src="brainvis.js"></script>
+
+    
+    <script>
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+        var container, stats;
+
+        var camera, scene, renderer;
+
+        
+        var mouseX = 0,
+            mouseY = 0;
+        var windowHalfX, windowHalfY;
+        var controls;
+        var isSpaceDown = false;
+        var knownBrainEdges = new Array();
+        var totalClusters = 0;
+
+        
+        var text = new VariableParametersBrainVisualisation();
+        var line;
+        var edgesGeometry;
+        var allLines = [];
+        var gui;
+
+        var uniforms, attributes;
+
+
+        $(document).ready(function() {
+            inputs.innerHTML = "Started loading edges!";
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                    processEdgesContent(httpRequest);
+                }
+                // Send the request
+            httpRequest.open("GET", 'edgesCoordinates.csv', true);
+            httpRequest.send(null);
+            
+        });
+
+        function generateControllerUpperRight()
+        {
+            gui = new dat.GUI();
+            var f2 = gui.addFolder('Min and max clusters');
+            var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
+            var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
+            f2.open();
+
+
+            maxController.onChange(function(value) {
+                if (text.minimumCluster > value) {
+                    text.minimumCluster = value;
+                }
+            });
+
+            minController.onChange(function(value) {
+                if (text.maximumCluster < value) {
+                    text.maximumCluster = value;
+                }
+            });
+            text.maximumCluster = totalClusters;
+        }
+        function init() {
+            container = document.getElementById('container');
+            inputs.innerHTML = "started rendering edges!";
+            
+            // Add the changable parameters					
+            generateControllerUpperRight();
+            
+            // Add the camera
+            camera = getCamera();
+
+            // Set the scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x050505, 2000, 3500);
+
+            // Add the controls
+            controls = new THREE.OrbitControls(camera, document.getElementById('container'));
+            controls.addEventListener('change', render);
+            
+            // Needed for the particles
+            var PI2 = Math.PI * 2;
+            var program = function ( context )
+            {
+                context.beginPath();
+                context.arc( 0, 0, 1, 0, PI2, true );
+                context.closePath();
+                context.fill();    
+            };
+            
+            var geometryPerCluster = [];
+            var groupColors = [];
+            var particles = new THREE.Geometry();
+            var pMaterial = new THREE.ParticleSystemMaterial({
+                size: 0.5,
+                color: 0xffffff
+            });
+            /*
+            var pMaterial = new THREE.PointCloudMaterial({
+              color: 0xFFFFFF,
+              size: 1,
+              map: THREE.ImageUtils.loadTexture(
+                "particle.png"
+              ),
+              blending: THREE.AdditiveBlending,
+              transparent: true
+            });*/
+            
+
+
+            // Initialise the clusters
+            for (var i = 0; i < totalClusters + 1; i++) {
+                geometryPerCluster[i] = new THREE.Geometry();
+                groupColors[i] = []
+            }
+            
+            // Process all particles in the brainvis library
+            processParticles(geometryPerCluster, groupColors, particles);
+
+            // Add all particles
+            var geometry = new THREE.Geometry();
+            var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
+            scene.add(particleSystem, groupColors);
+
+
+            
+            // Add a color to each group of vertexes and add them to the scene
+            for (var i = 0; i < totalClusters; i++) {
+                geometryPerCluster[i].colors = groupColors[i];
+                var lineMaterial = new THREE.LineBasicMaterial({
+                    vertexColors: geometryPerCluster[i].colors,
+                    linewidth: 1,
+                    opacity: 0.4, 
+                    blending: THREE.AdditiveBlending, 
+                    transparent: true
+                });
+                allLines[i] = new THREE.Line(geometryPerCluster[i], lineMaterial, THREE.LinePieces);
+                allLines[i].visible = true;
+                scene.add(allLines[i]);
+            }
+
+            // Update our message at the top
+            inputs.innerHTML = "Done rendering edges";
+
+            //Set the renderer
+            renderer = new THREE.WebGLRenderer({
+                antialias: false
+            });
+            renderer.setClearColor(scene.fog.color, 1);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Do something with statistics showing the frames per second
+            initialiseStatistics();
+            
+            requestAnimationFrame(animate);
+
+            // Render and animate
+            render();
+            stats.update();
+            animate();
+
+            // Add window listeners
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('keydown', onDocumentKeyDown, false);
+
+            render();
+            stats.update();
+            animate();
+            render();
+            console.log("now done with everything!");
+            
+        }
+        
+        function initialiseStatistics()
+        {
+            stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            container.appendChild(stats.domElement);
+        }
+        function onDocumentKeyDown(event) {
+            //if (event.keyCode == 32) // Spacebar
+        }
+
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+        }
+
+        function onDocumentMouseMove(event) {
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+            stats.update();
+        }
+
+        function render() {
+            console.log("Rendering");
+            // change the visibility of the clusters
+            for (var i = 0; i < totalClusters; i++) {
+                if (i >= text.minimumCluster && i <= text.maximumCluster) {
+                    allLines[i].visible = true;
+                } else {
+                    allLines[i].visible = false;
+                }
+            }
+            renderer.render(scene, camera);
+        }
+    </script>
+
+</body>
+
+</html>
