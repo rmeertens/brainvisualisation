@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <title>Cardboard Example</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
-      body {
-        margin: 0px;
-        overflow: hidden;
-      }
-      #example {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      }
+        body {
+            margin: 0px;
+            overflow: hidden;
+        }
+        #example {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="inputs" class="clearfix">
         Please wait while the data is loading!
     </div>
@@ -27,75 +29,82 @@
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
     <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
     <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
-  <script src="js/third-party/threejs/three.min.js"></script>
-  <script src="js/third-party/threejs/StereoEffect.js"></script>
-  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-  <script src="js/third-party/threejs/OrbitControls.js"></script>
-  <script src="js/brainvis.js"></script>
-<script src="js/Detector.js"></script>
-      <script src="js/dat.gui.min.js"></script>
-  <script>
+    <script src="js/third-party/threejs/three.min.js"></script>
+    <script src="js/third-party/threejs/StereoEffect.js"></script>
+    <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+    <script src="js/third-party/threejs/OrbitControls.js"></script>
+    <script src="js/brainvis.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script>
+        if (!Detector.webgl) {
+            Detector.addGetWebGLMessage();
+        }
 
-    if (!Detector.webgl) Detector.addGetWebGLMessage();
+        // Variables for THREE JS
+        var camera, scene, renderer;
+        var effect, controls;
+        var element, container;
 
-    // Variables for THREE JS
-    var camera, scene, renderer;
-    var effect, controls;
-    var element, container;
-      
-    // Statistics showing the frames per second
-    var stats;
+        // Statistics showing the frames per second
+        var stats;
 
-       var text = new VariableParametersBrainVisualisation();
-      
-    var mouseX = 0,
-        mouseY = 0;
-    var windowHalfX, windowHalfY;
-    var knownBrainEdges = new Array();
-    var knownNodes = new Array();
-    var allLines = [];
-    var totalClusters = 0;         
+        var text = new VariableParametersBrainVisualisation();
 
-    var locationMiddleX = 0;
-    var locationMiddleY = 0;
-    var locationMiddleZ = 65;
-    var collectionBrainCoordinates = new THREE.Geometry();
-    var nodes = new Array();
-    var clock = new THREE.Clock();
-      var mesh;
-      var initialisedNodes=false;
-      var initialisedEdges=false;
-    
-    $(document).ready(function() {
-        inputs.innerHTML = "Started loading edges!";
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function() {
-                processEdgesContent(httpRequest);
-            }
-            // Send the request
-        httpRequest.open("GET", 'edgesCoordinates.csv', true);
-        httpRequest.send(null);
+        var mouseX = 0,
+            mouseY = 0;
+        var windowHalfX, windowHalfY;
+        var knownBrainEdges = new Array();
+        var knownNodes = new Array();
+        var allLines = [];
+        var particleSystem;
+        var completeBrainParticleSystem;
+        var totalClusters = 0;
 
-        
-        
-        var httpRequest2 = new XMLHttpRequest();
-        httpRequest2.onreadystatechange = function() {
-                processNodesContent(httpRequest2);
-            }
-            // Send the request
-        httpRequest2.open("GET", 'node1sup.csv', true);
-        httpRequest2.send(null);
-    }); 
+        var locationMiddleX = 0;
+        var locationMiddleY = 0;
+        var locationMiddleZ = 65;
+        var collectionBrainCoordinates = new THREE.Geometry();
+        var nodes = new Array();
+        var clock = new THREE.Clock();
+        var mesh;
+        var initialisedNodes = false;
+        var initialisedEdges = false;
 
-      function generateControllerUpperRight()
-        {
+        $(document).ready(function() {
+            inputs.innerHTML = "Started loading edges!";
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                    processEdgesContent(httpRequest);
+                }
+                // Send the request
+            httpRequest.open("GET", 'edgesCoordinates.csv', true);
+            httpRequest.send(null);
+
+
+
+            var httpRequest2 = new XMLHttpRequest();
+            httpRequest2.onreadystatechange = function() {
+                    processNodesContent(httpRequest2);
+                }
+                // Send the request
+            httpRequest2.open("GET", 'node1sup.csv', true);
+            httpRequest2.send(null);
+        });
+
+        function generateControllerUpperRight() {
             gui = new dat.GUI();
             var f2 = gui.addFolder('Min and max clusters');
             var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
             var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
+            var isBrainOn = f2.add(text,"displayCompleteBrain");
             f2.open();
 
-
+            isBrainOn.onChange(function(value)
+            {
+                completeBrainParticleSystem.visible = text.displayCompleteBrain;
+                
+            });
             maxController.onChange(function(value) {
                 if (text.minimumCluster > value) {
                     text.minimumCluster = value;
@@ -109,140 +118,138 @@
             });
             text.maximumCluster = totalClusters;
         }
-      
-    function init() {
-        if(!(initialisedEdges && initialisedNodes))
-           {
-return;
-           }
-      renderer = new THREE.WebGLRenderer();
-      element = renderer.domElement;
-      container = document.getElementById('example');
-      container.appendChild(element);
-      inputs.innerHTML = "started rendering edges!";
 
-    // Add the changable parameters					
-    generateControllerUpperRight();
+        function init() {
+            if (!(initialisedEdges && initialisedNodes)) {
+                return;
+            }
+            renderer = new THREE.WebGLRenderer();
+            element = renderer.domElement;
+            container = document.getElementById('example');
+            container.appendChild(element);
+            inputs.innerHTML = "started rendering edges!";
 
-      scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-				camera.position.z = 500;
+            // Add the changable parameters					
+            generateControllerUpperRight();
 
-				controls = new THREE.OrbitControls( camera );
-        controls.rotateSpeed=0.6;
-        controls.target.z=locationMiddleZ;
-        controls.maxPolarAngle = Math.PI/1.5; 
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 500;
 
-        
-        // Start adding all nodes
-         var geometryPerCluster = [];
+            controls = new THREE.OrbitControls(camera);
+            controls.rotateSpeed = 0.6;
+            controls.target.z = locationMiddleZ;
+            controls.maxPolarAngle = Math.PI / 1.5;
+
+
+            // Start adding all nodes
+            var geometryPerCluster = [];
             var groupColors = [];
             var particles = new THREE.Geometry();
             var pMaterial = new THREE.ParticleSystemMaterial({
                 size: 0.5,
                 color: 0xffffff
             });
-         // Initialise the clusters
+            // Initialise the clusters
             for (var i = 0; i < totalClusters + 1; i++) {
                 geometryPerCluster[i] = new THREE.Geometry();
                 groupColors[i] = []
             }
-         // Process all particles in the brainvis library
-        processParticles(geometryPerCluster,groupColors,particles);
-         
+            // Process all particles in the brainvis library
+            processParticles(geometryPerCluster, groupColors, particles);
 
-        // Add all particles
-        var geometry = new THREE.Geometry();
-        var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
-        scene.add(particleSystem, groupColors);
 
-        allLines = initialiseAllLines(totalClusters,groupColors,geometryPerCluster);
-        
-        for(var i=0;i<totalClusters;i++)
-        {
+            // Add all particles
+            var geometry = new THREE.Geometry();
+            completeBrainParticleSystem = new THREE.ParticleSystem(particles, pMaterial);
+            scene.add(particleSystem, groupColors);
+
+            allLines = initialiseAllLines(totalClusters, groupColors, geometryPerCluster);
+
+            for (var i = 0; i < totalClusters; i++) {
+
+                scene.add(allLines[i]);
+            }
             
-            scene.add(allLines[i]);
-        }
-      window.addEventListener('resize', resize, false);
-        
-        // Add all nodes
-        var geometry3 = new THREE.BoxGeometry( 1, 1, 1 ); 
-            var material3 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
-            
+
+            // Initialise the brain particles
             var geometryPerCluster = [];
             var groupColors = [];
-            
+
             var pMaterial = new THREE.ParticleSystemMaterial({
                 size: 0.5,
                 color: 0xffffff
             });
-             // Initialise the clusters
+            
+            // Initialise the clusters
             for (var i = 0; i < totalClusters + 1; i++) {
                 geometryPerCluster[i] = new THREE.Geometry();
                 groupColors[i] = []
             }
-        for(var row=0;row<nodes.length;row++)
-        {
-            particle = new THREE.Vector3(nodes[row][0],nodes[row][1],nodes[row][2]);
-                    collectionBrainCoordinates.vertices.push(particle);
-        }
-        // Add all particles
+            for (var row = 0; row < nodes.length; row++) {
+                particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
+                collectionBrainCoordinates.vertices.push(particle);
+            }
+            // Add all particles
             var geometry = new THREE.Geometry();
-            var particleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
-            scene.add(particleSystem, groupColors);
-        
-        animate();
-      setTimeout(resize, 1);
-    }
+            completeBrainParticleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
+            scene.add(completeBrainParticleSystem, groupColors);
+            
 
-    function resize() {
-      var width = container.offsetWidth;
-      var height = container.offsetHeight;
+            window.addEventListener('resize', resize, false);
+            animate();
+            setTimeout(resize, 1);
+        }
 
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+        function resize() {
+            var width = container.offsetWidth;
+            var height = container.offsetHeight;
 
-      renderer.setSize(width, height);
-      
-    }
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
 
-    function update(dt) {
-      resize();
+            renderer.setSize(width, height);
 
-      camera.updateProjectionMatrix();
+        }
 
-      controls.update(dt);
-    }
+        function update(dt) {
+            resize();
 
-    function render(dt) {
-         for (var i = 0; i < totalClusters; i++) {
+            camera.updateProjectionMatrix();
+
+            controls.update(dt);
+        }
+
+        function render(dt) {
+            for (var i = 0; i < totalClusters; i++) {
                 if (i >= text.minimumCluster && i <= text.maximumCluster) {
                     allLines[i].visible = true;
                 } else {
                     allLines[i].visible = false;
                 }
-         }
-        renderer.render(scene, camera);
-    }
+            }
+            renderer.render(scene, camera);
+        }
 
-    function animate(t) {
-      requestAnimationFrame(animate);
+        function animate(t) {
+            requestAnimationFrame(animate);
 
-      update(clock.getDelta());
-      render(clock.getDelta());
-    }
+            update(clock.getDelta());
+            render(clock.getDelta());
+        }
 
-    function fullscreen() {
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      } else if (container.msRequestFullscreen) {
-        container.msRequestFullscreen();
-      } else if (container.mozRequestFullScreen) {
-        container.mozRequestFullScreen();
-      } else if (container.webkitRequestFullscreen) {
-        container.webkitRequestFullscreen();
-      }
-    }
-  </script>
-  </body>
+        function fullscreen() {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+        }
+    </script>
+</body>
+
 </html>

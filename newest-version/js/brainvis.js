@@ -64,6 +64,7 @@ var VariableParametersBrainVisualisation = function() {
     this.minimumCluster = 0;
     this.maximumCluster = 0;
     this.displayOutline = false;
+    this.displayCompleteBrain=true;
 };
 
 function getCamera()
