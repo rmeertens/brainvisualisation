@@ -121,3 +121,22 @@ function addVertexes(geometryPerCluster,groupColors)
                 scene.add(allLines[i]);
             }   
 }
+
+// This function initialises all the lines. 
+// It creates the line objects, adds the color, and retuns a list with all lines. 
+function initialiseAllLines(totalClusters,groupColors,geometryPerCluster)
+{   
+    for (var i = 0; i < totalClusters; i++) {
+            geometryPerCluster[i].colors = groupColors[i];
+            var lineMaterial = new THREE.LineBasicMaterial({
+                vertexColors: geometryPerCluster[i].colors,
+                linewidth: 1,
+                opacity: 0.4, 
+                blending: THREE.AdditiveBlending, 
+                transparent: true
+            });
+            allLines[i] = new THREE.Line(geometryPerCluster[i], lineMaterial, THREE.LinePieces);
+            allLines[i].visible = true;
+        }  
+    return allLines;
+}
