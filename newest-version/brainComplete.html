@@ -148,33 +148,9 @@ return;
                 groupColors[i] = []
             }
          // Process all particles in the brainvis library
-
-         for (var i = 0; i < knownBrainEdges.length; i++) {
-                edge = knownBrainEdges[i];
-                var material; //= pMaterial;
-                particle = new THREE.Sprite(material);
-                particle.position.x = edge[0];
-                particle.position.y = edge[1];
-                particle.position.z = edge[2];
-                geometryPerCluster[edge[6]].vertices.push(particle.position);
-
-                particle = new THREE.Sprite(material);
-                particle.position.x = edge[3];
-                particle.position.y = edge[4];
-                particle.position.z = edge[5];
-    geometryPerCluster[edge[6]].vertices.push(particle.position);
-
-                var color = new THREE.Color(0xffffff);
-                color.setHSL(edge[6] / totalClusters, 2.0, 0.5);
-                groupColors[edge[6]].push(color);
-                groupColors[edge[6]].push(color);
-
-                particle = new THREE.Vector3(edge[3], edge[4], edge[5]);
-
-                particles.vertices.push(particle);
-
-            }
-
+        processParticles(geometryPerCluster,groupColors,particles);
+         
+        
             // Add all particles
             var geometry = new THREE.Geometry();
             var particleSystem = new THREE.ParticleSystem(particles, pMaterial);

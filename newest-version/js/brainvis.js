@@ -35,9 +35,6 @@ function processNodesContent(httpRequest) {
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-            
-            
-            
             console.log("Really processing nodes");
             // Add each node to a list of lists
             CSVContents = httpRequest.responseText;
