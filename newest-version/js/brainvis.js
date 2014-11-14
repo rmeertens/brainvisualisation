@@ -22,7 +22,6 @@ function processEdgesContent(httpRequest) {
 			knownBrainEdges = edges;
             initialisedEdges=true;
 			init();
-			animate();
         }
         else {
             alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
