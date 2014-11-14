@@ -103,3 +103,21 @@ function processParticles(geometryPerCluster, groupColors, particles)
 
             }
 }
+
+function addVertexes(geometryPerCluster,groupColors)
+{
+    // Add a color to each group of vertexes and add them to the scene
+            for (var i = 0; i < totalClusters; i++) {
+                geometryPerCluster[i].colors = groupColors[i];
+                var lineMaterial = new THREE.LineBasicMaterial({
+                    vertexColors: geometryPerCluster[i].colors,
+                    linewidth: 1,
+                    opacity: 0.4, 
+                    blending: THREE.AdditiveBlending, 
+                    transparent: true
+                });
+                allLines[i] = new THREE.Line(geometryPerCluster[i], lineMaterial, THREE.LinePieces);
+                allLines[i].visible = true;
+                scene.add(allLines[i]);
+            }   
+}
