@@ -31,12 +31,11 @@ function processEdgesContent(httpRequest) {
 }
 
 function processNodesContent(httpRequest) {
-    console.log("proecessing nodes?");
     
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-            console.log("Really processing nodes");
+ 
             // Add each node to a list of lists
             CSVContents = httpRequest.responseText;
             var data = $.csv.toArrays(CSVContents);
@@ -46,10 +45,10 @@ function processNodesContent(httpRequest) {
 			    nodes[row-1][1] = data[row][2] //y
 			    nodes[row-1][2] = data[row][3] //z	
 			}
-			inputs.innerHTML = "Done loading nodes!";
+			
 			knownBrainNodes = nodes;
             initialisedNodes=true;
-			init();
+			addAllNodes();
         }
         else {
             alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);

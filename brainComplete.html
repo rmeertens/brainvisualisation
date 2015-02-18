@@ -16,14 +16,22 @@
             left: 0;
             right: 0;
             bottom: 0;
-        }
+        } 
+        #info {
+				position: absolute;
+				top: 50px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
     </style>
 </head>
 
 <body>
-    <div id="inputs" class="clearfix">
-        Please wait while the data is loading!
-    </div>
+    <div id="info"><font color="red">
+          Loading data in: <span id="timer"></span></font>
+		</div>
     <div id="example"></div>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
@@ -71,8 +79,35 @@
         var initialisedNodes = false;
         var initialisedEdges = false;
 
-        $(document).ready(function() {
-            inputs.innerHTML = "Started loading edges!";
+        
+         
+    $(document).ready(function() {
+        init(); 
+    }); 
+      
+      var count=500;
+      var counter=setInterval(timer, 1); 
+
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
+      
+    function startLoadingData()
+      {
+          
+        
             var httpRequest = new XMLHttpRequest();
             httpRequest.onreadystatechange = function() {
                     processEdgesContent(httpRequest);
@@ -90,7 +125,8 @@
                 // Send the request
             httpRequest2.open("GET", 'node1sup.csv', true);
             httpRequest2.send(null);
-        });
+        }
+    
 
         function generateControllerUpperRight() {
             gui = new dat.GUI();
@@ -120,17 +156,13 @@
         }
 
         function init() {
-            if (!(initialisedEdges && initialisedNodes)) {
-                return;
-            }
+            
             renderer = new THREE.WebGLRenderer();
             element = renderer.domElement;
             container = document.getElementById('example');
             container.appendChild(element);
-            inputs.innerHTML = "started rendering edges!";
 
-            // Add the changable parameters					
-            generateControllerUpperRight();
+            
 
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
@@ -142,6 +174,30 @@
             controls.maxPolarAngle = Math.PI / 1.5;
 
 
+
+            window.addEventListener('resize', resize, false);
+            animate();
+            setTimeout(resize, 1);
+        }
+
+        function resize() {
+            var width = container.offsetWidth;
+            var height = container.offsetHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+
+        }
+        function addAllNodes()
+        {
+          //  return;
+            if (!(initialisedEdges && initialisedNodes)) {
+                return;
+            }
+            console.log("Now adding all nodes");
+            
             // Start adding all nodes
             var geometryPerCluster = [];
             var groupColors = [];
@@ -194,22 +250,9 @@
             var geometry = new THREE.Geometry();
             completeBrainParticleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
             scene.add(completeBrainParticleSystem, groupColors);
-            
-
-            window.addEventListener('resize', resize, false);
-            animate();
-            setTimeout(resize, 1);
-        }
-
-        function resize() {
-            var width = container.offsetWidth;
-            var height = container.offsetHeight;
-
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(width, height);
-
+         
+            // Add the changable parameters					
+            generateControllerUpperRight();
         }
 
         function update(dt) {
@@ -221,13 +264,14 @@
         }
 
         function render(dt) {
+            /*
             for (var i = 0; i < totalClusters; i++) {
                 if (i >= text.minimumCluster && i <= text.maximumCluster) {
                     allLines[i].visible = true;
                 } else {
                     allLines[i].visible = false;
                 }
-            }
+            }*/
             renderer.render(scene, camera);
         }
 

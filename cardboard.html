@@ -31,12 +31,7 @@
 
           Loading data in: <span id="timer"></span></font>
 		</div>
-      
-      
-      
-    <div id="inputs" class="clearfix">
-        Please wait while the data is loading!
-    </div>
+    
     <div id="example"></div>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
@@ -79,30 +74,28 @@
     }); 
       
       var count=500;
+      var counter=setInterval(timer, 1); 
 
-var counter=setInterval(timer, 1); //1000 will  run it every 1 second
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
 
-function timer()
-{
-  count=count-1;
-  if (count <= 0)
-  {
-     clearInterval(counter);
-     //counter ended, do something here
-      document.getElementById("info").innerHTML="";
-      startLoadingData();
-     return;
-  }
-
-  //Do code for showing the number of seconds here
-     document.getElementById("timer").innerHTML=count + " miliseconds"; // watch for spelling
-
-}
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
       
     function startLoadingData()
       {
           
-        //inputs.innerHTML = "Started loading edges!";
+        
         var httpRequest = new XMLHttpRequest();
         httpRequest.onreadystatechange = function() {
             processEdgesContent(httpRequest);
@@ -120,7 +113,7 @@ function timer()
       element = renderer.domElement;
       container = document.getElementById('example');
       container.appendChild(element);
-      inputs.innerHTML = "started rendering edges!";
+      
 
       effect = new THREE.StereoEffect(renderer);
 
