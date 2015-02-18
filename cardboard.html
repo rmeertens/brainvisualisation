@@ -72,6 +72,7 @@
     }); 
 
     function init() {
+        console.log("In the init function");
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
       container = document.getElementById('example');
@@ -152,7 +153,13 @@
 
         
         
-        
+        addAllNodes();
+        animate();
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+      function addAllNodes(){
+       
         // Start adding all nodes
          var geometryPerCluster = [];
             var groupColors = [];
@@ -183,11 +190,8 @@
         {
             
             scene.add(allLines[i]);
-        }
-        animate();
-      window.addEventListener('resize', resize, false);
-      setTimeout(resize, 1);
-    }
+        }   
+      }
 
     function resize() {
       var width = container.offsetWidth;
