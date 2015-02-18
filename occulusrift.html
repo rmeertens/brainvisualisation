@@ -16,21 +16,29 @@
         right: 0;
         bottom: 0;
       }
+        #info {
+				position: absolute;
+				top: 50px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
     </style>
   </head>
   <body>
-    <div id="inputs" class="clearfix">
-        Please wait while the data is loading!
-    </div>
+      <div id="info"><font color="red">
+
+          Loading data in: <span id="timer"></span></font>
+		</div>
+    
     <div id="example"></div>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
     <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
-    <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
   <script src="js/third-party/threejs/three.min.js"></script>
   <script src="js/third-party/threejs/StereoEffect.js"></script>
-   <script src="js/third-party/threejs/OculusRiftEffect.js"></script>
   <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OculusRiftEffect.js"></script>
   <script src="js/third-party/threejs/OrbitControls.js"></script>
   <script src="js/brainvis.js"></script>
 <script src="js/Detector.js"></script>
@@ -45,7 +53,7 @@
       
     // Statistics showing the frames per second
     var stats;
-
+     var initialisedCamera = false;
     var mouseX = 0,
         mouseY = 0;
     var windowHalfX, windowHalfY;
@@ -63,26 +71,50 @@
     //animate();
     
     $(document).ready(function() {
-        inputs.innerHTML = "Started loading edges!";
+        init(); 
+    }); 
+      
+      var count=500;
+      var counter=setInterval(timer, 1); 
+
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
+      
+    function startLoadingData()
+      {
+          
+        
         var httpRequest = new XMLHttpRequest();
         httpRequest.onreadystatechange = function() {
-                processEdgesContent(httpRequest);
+            processEdgesContent(httpRequest);
+
+                
             }
             // Send the request
         httpRequest.open("GET", 'edgesCoordinates.csv', true);
         httpRequest.send(null);
-
-    }); 
+      }
 
     function init() {
+        console.log("In the init function");
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
       container = document.getElementById('example');
       container.appendChild(element);
-      inputs.innerHTML = "started rendering edges!";
-
-      //effect = new THREE.StereoEffect(renderer);
-      effect = new THREE.OculusRiftEffect( renderer, {worldScale: 100} );
+            effect = new THREE.OculusRiftEffect( renderer, {worldScale: 100} );
 
       scene = new THREE.Scene();
 
@@ -101,17 +133,26 @@
       controls.noPan = true;
 
       function setOrientationControls(e) {
+          console.log("Setting the orientation controls");
         if (!e.alpha) {
+            console.log("no e.alpha");
           return;
         }
-
+          if(!initialisedCamera)
+          {
+              initialisedCamera = true;
+        console.log("setting and updating controls");
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
         controls.update();
-
+          console.log("Adding event listener");
         element.addEventListener('click', fullscreen, false);
-
+          console.log("removing event listener");
         window.removeEventListener('deviceorientation', setOrientationControls);
+          }
+          else{
+            console.log("Error: trying to intialise camera a second time");   
+          }
       }
       window.addEventListener('deviceorientation', setOrientationControls, true);
 
@@ -154,7 +195,13 @@
 
         
         
-        
+      //  addAllNodes();
+        animate();
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+      function addAllNodes(){
+       
         // Start adding all nodes
          var geometryPerCluster = [];
             var groupColors = [];
@@ -185,11 +232,8 @@
         {
             
             scene.add(allLines[i]);
-        }
-        animate();
-      window.addEventListener('resize', resize, false);
-      setTimeout(resize, 1);
-    }
+        }   
+      }
 
     function resize() {
       var width = container.offsetWidth;
