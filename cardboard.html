@@ -42,7 +42,7 @@
       
     // Statistics showing the frames per second
     var stats;
-
+     var initialisedCamera = false;
     var mouseX = 0,
         mouseY = 0;
     var windowHalfX, windowHalfY;
@@ -103,6 +103,9 @@
             console.log("no e.alpha");
           return;
         }
+          if(!initialisedCamera)
+          {
+              initialisedCamera = true;
         console.log("setting and updating controls");
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
@@ -111,6 +114,10 @@
         element.addEventListener('click', fullscreen, false);
           console.log("removing event listener");
         window.removeEventListener('deviceorientation', setOrientationControls);
+          }
+          else{
+            console.log("Error: trying to intialise camera a second time");   
+          }
       }
       window.addEventListener('deviceorientation', setOrientationControls, true);
 
