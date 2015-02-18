@@ -60,16 +60,24 @@
     //animate();
     
     $(document).ready(function() {
-        inputs.innerHTML = "Started loading edges!";
+        init();
+        window.setTimeout(startLoadingData, 2000);
+ 
+    }); 
+    function startLoadingData()
+      {
+          
+        //inputs.innerHTML = "Started loading edges!";
         var httpRequest = new XMLHttpRequest();
         httpRequest.onreadystatechange = function() {
-                processEdgesContent(httpRequest);
+            processEdgesContent(httpRequest);
+
+                
             }
             // Send the request
         httpRequest.open("GET", 'edgesCoordinates.csv', true);
         httpRequest.send(null);
-
-    }); 
+      }
 
     function init() {
         console.log("In the init function");
@@ -160,7 +168,7 @@
 
         
         
-        addAllNodes();
+      //  addAllNodes();
         animate();
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);

@@ -18,10 +18,11 @@ function processEdgesContent(httpRequest) {
 			    edges[row-1][6] = data[row][6] //color
 			    totalClusters = Math.max(totalClusters,data[row][6]);				    
 			}
-			inputs.innerHTML = "Done loading edges!";
+			//inputs.innerHTML = "Done loading edges!";
 			knownBrainEdges = edges;
             initialisedEdges=true;
-			init();
+			//init();
+              addAllNodes();
         }
         else {
             alert(' => There was a problem with the request. ' + httpRequest.status + httpRequest.responseText);
