@@ -16,9 +16,24 @@
         right: 0;
         bottom: 0;
       }
+        #info {
+				position: absolute;
+				top: 50px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
     </style>
   </head>
   <body>
+      <div id="info"><font color="red">
+
+          Loading data in: <span id="timer"></span></font>
+		</div>
+      
+      
+      
     <div id="inputs" class="clearfix">
         Please wait while the data is loading!
     </div>
@@ -60,10 +75,30 @@
     //animate();
     
     $(document).ready(function() {
-        init();
-        window.setTimeout(startLoadingData, 2000);
- 
+        init(); 
     }); 
+      
+      var count=500;
+
+var counter=setInterval(timer, 1); //1000 will  run it every 1 second
+
+function timer()
+{
+  count=count-1;
+  if (count <= 0)
+  {
+     clearInterval(counter);
+     //counter ended, do something here
+      document.getElementById("info").innerHTML="";
+      startLoadingData();
+     return;
+  }
+
+  //Do code for showing the number of seconds here
+     document.getElementById("timer").innerHTML=count + " miliseconds"; // watch for spelling
+
+}
+      
     function startLoadingData()
       {
           
