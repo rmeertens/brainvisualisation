@@ -1,11 +1,11 @@
 function processEdgesContent(httpRequest) {
-    console.log("proecessing edges");
+    //console.log("proecessing edges");
     var edges = new Array();
     if (httpRequest.readyState === 4){
         // everything is good, the response is received
         if ((httpRequest.status == 200) || (httpRequest.status == 0)){
             CSVContents = httpRequest.responseText;
-            console.log(CSVContents);
+            //console.log(CSVContents);
             var data = $.csv.toArrays(CSVContents);
             for(var row=1; row < data.length; row++) {
 			   	edges[row-1] = new Array();
