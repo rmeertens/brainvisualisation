@@ -99,15 +99,16 @@
       function setOrientationControls(e) {
           console.log("Setting the orientation controls");
         if (!e.alpha) {
+            console.log("no e.alpha");
           return;
         }
-
+        console.log("setting and updating controls");
         controls = new THREE.DeviceOrientationControls(camera, true);
         controls.connect();
         controls.update();
-
+          console.log("Adding event listener");
         element.addEventListener('click', fullscreen, false);
-
+          console.log("removing event listener");
         window.removeEventListener('deviceorientation', setOrientationControls);
       }
       window.addEventListener('deviceorientation', setOrientationControls, true);
