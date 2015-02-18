@@ -101,6 +101,11 @@
       mesh.rotation.x = -Math.PI / 2;
       scene.add(mesh);
 
+        
+        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
+        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+        
+
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
     }
@@ -136,6 +141,7 @@
     }
 
     function fullscreen() {
+        console.log("Going fullscreen");
       if (container.requestFullscreen) {
         container.requestFullscreen();
       } else if (container.msRequestFullscreen) {
@@ -145,6 +151,13 @@
       } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
       }
+        
+        var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2.position.x = 10;
+        cube2.position.y = 0;
+        cube2.position.z = 0;
+        scene.add( cube2 );
     }
   </script>
   </body>
