@@ -15,8 +15,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-      } 
-        #info {
+      }
+            #info {
 				position: absolute;
 				top: 50px;
 				width: 100%;
@@ -27,91 +27,49 @@
     </style>
   </head>
   <body>
-   <div id="info"><font color="red">
+      <button onclick="myFunction()">Click me</button>
+    <div id="example"></div> <div id="info"><font color="red">
 
           Loading data in: <span id="timer"></span></font>
 		</div>
-    <div id="example"></div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
-    <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+      <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
   <script src="js/third-party/threejs/three.min.js"></script>
   <script src="js/third-party/threejs/StereoEffect.js"></script>
   <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-  <script src="js/third-party/threejs/OrbitControls.js"></script>
-  <script src="js/brainvis.js"></script>
-<script src="js/Detector.js"></script>
+      <script src="js/brainvis.js"></script>
       <script src="js/dat.gui.min.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+
   <script>
-
-    if (!Detector.webgl) Detector.addGetWebGLMessage();
-
-    // Variables for THREE JS
     var camera, scene, renderer;
     var effect, controls;
     var element, container;
-      
-    // Statistics showing the frames per second
-    var stats;
-
-       var text = new VariableParametersBrainVisualisation();
-      
-    var mouseX = 0,
-        mouseY = 0;
-    var windowHalfX, windowHalfY;
-    var knownBrainEdges = new Array();
+var text = new VariableParametersBrainVisualisation();
+    var clock = new THREE.Clock();
+var knownBrainEdges = new Array();
       var allLines = [];
-    var totalClusters = 0;         
-
+          var totalClusters = 0;         
+  var mesh;
     var locationMiddleX = 0;
     var locationMiddleY = 0;
       var locationMiddleZ = 65;
 
-    var clock = new THREE.Clock();
-      var mesh;
-    //init();
-    //animate();
-    
-     $(document).ready(function() {
-        init(); 
-    }); 
-      
-      var count=500;
-      var counter=setInterval(timer, 1); 
+    init();
+    animate();
 
-    function timer()
-    {
-      count=count-1;
-      if (count <= 0)
-      {
-         clearInterval(counter);
-         //counter ended, do something here
-          document.getElementById("info").innerHTML="";
-          startLoadingData();
-         return;
-      }
-
-      //Do code for showing the number of seconds here
-         document.getElementById("timer").innerHTML=count + " miliseconds"; 
-    }
-      
-    function startLoadingData()
-      {
+      function myFunction(){
           
-        
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function() {
-            processEdgesContent(httpRequest);
-
-                
-            }
-            // Send the request
-        httpRequest.open("GET", 'edgesCoordinates.csv', true);
-        httpRequest.send(null);
+        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
+        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+        var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2.position.x = 10;
+        cube2.position.y = 0;
+        cube2.position.z = 0;
+        scene.add( cube2 );
       }
-
-      function generateControllerUpperRight()
+       function generateControllerUpperRight()
         {
             gui = new dat.GUI();
             var f2 = gui.addFolder('Min and max clusters');
@@ -133,7 +91,6 @@
             });
             text.maximumCluster = totalClusters;
         }
-      
     function init() {
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
@@ -142,16 +99,40 @@
 
 
       scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+
+       camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.z = 500;
 
-				controls = new THREE.OrbitControls( camera );
-        controls.rotateSpeed=0.6;
-        controls.target.z=locationMiddleZ;
-        controls.maxPolarAngle = Math.PI/1.5; 
+      camera.position.set(0, 10, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+     // controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        locationMiddleX,
+        locationMiddleY,
+        locationMiddleZ
+      );
+      //controls.noZoom = false;
+      //controls.noPan = true;
+/*
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
+        }
+
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
+
+        element.addEventListener('click', fullscreen, false);
+
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);*/
 
 
-        var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
+      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.5);
       scene.add(light);
 
       var texture = THREE.ImageUtils.loadTexture(
@@ -172,31 +153,54 @@
 
       var geometry = new THREE.PlaneGeometry(1000, 1000);
 
-      mesh = new THREE.Mesh(geometry, material);
+      var mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -Math.PI / 2;
-        mesh.position.y = -30;
+      mesh.position.y = -30;
       scene.add(mesh);
-      
-        /*
-       var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
-        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
-        var cube2 = new THREE.Mesh( geometry2, material2 ); 
-        cube2 = new THREE.Mesh( geometry2, material2 ); 
-        cube2.position.x = locationMiddleX;
-        cube2.position.y = locationMiddleY;
-        cube2.position.z = locationMiddleZ;
-        scene.add( cube2 );
 
-        */
         
         
-      
-        animate();
+
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
     }
+      
+       var count=500;
+      var counter=setInterval(timer, 1); 
 
-       function addAllNodes(){
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
+      
+      
+      function startLoadingData()
+      {
+          
+        console.log("Started loading data");
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            processEdgesContent(httpRequest);
+
+                
+            }
+            // Send the request
+        httpRequest.open("GET", 'edgesCoordinates.csv', true);
+        httpRequest.send(null);
+      }
+      
+      function addAllNodes(){
        
         // Start adding all nodes
          var geometryPerCluster = [];
@@ -232,9 +236,10 @@
            
                // Add the changable parameters					
     generateControllerUpperRight();
+    
 
       }
-      
+
     function resize() {
       var width = container.offsetWidth;
       var height = container.offsetHeight;
@@ -243,7 +248,7 @@
       camera.updateProjectionMatrix();
 
       renderer.setSize(width, height);
-      
+     
     }
 
     function update(dt) {
@@ -262,7 +267,7 @@
                     allLines[i].visible = false;
                 }
             }
-        renderer.render(scene, camera);
+      renderer.render(scene, camera);
     }
 
     function animate(t) {
@@ -282,6 +287,7 @@
       } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
       }
+        
     }
   </script>
   </body>
