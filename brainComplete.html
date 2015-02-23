@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <title>Cardboard Example</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
-        body {
-            margin: 0px;
-            overflow: hidden;
-        }
-        #example {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        } 
-        #info {
+      body {
+        margin: 0px;
+        overflow: hidden;
+      }
+      #example {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+            #info {
 				position: absolute;
 				top: 50px;
 				width: 100%;
@@ -26,108 +25,58 @@
 				display:block;
 			}
     </style>
-</head>
+  </head>
+  <body>
+      <button onclick="myFunction()">Click me</button>
+    <div id="example"></div> <div id="info"><font color="red">
 
-<body>
-    <div id="info"><font color="red">
           Loading data in: <span id="timer"></span></font>
 		</div>
-    <div id="example"></div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
-    <!--<script src="http://jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>-->
-    <script src="js/third-party/threejs/three.min.js"></script>
-    <script src="js/third-party/threejs/StereoEffect.js"></script>
-    <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-    <script src="js/third-party/threejs/OrbitControls.js"></script>
-    <script src="js/brainvis.js"></script>
-    <script src="js/Detector.js"></script>
-    <script src="js/dat.gui.min.js"></script>
-    <script>
-        if (!Detector.webgl) {
-            Detector.addGetWebGLMessage();
-        }
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+      <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+  <script src="js/third-party/threejs/three.min.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+      <script src="js/brainvis.js"></script>
+      <script src="js/dat.gui.min.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
 
-        // Variables for THREE JS
-        var camera, scene, renderer;
-        var effect, controls;
-        var element, container;
+  <script>
+    var camera, scene, renderer;
+    var effect, controls;
+    var element, container;
+var text = new VariableParametersBrainVisualisation();
+    var clock = new THREE.Clock();
+var knownBrainEdges = new Array();
+      var allLines = [];
+          var totalClusters = 0;         
+  var mesh;
+    var locationMiddleX = 0;
+    var locationMiddleY = 0;
+      var locationMiddleZ = 65;
 
-        // Statistics showing the frames per second
-        var stats;
+         var nodes = new Array();
 
-        var text = new VariableParametersBrainVisualisation();
-
-        var mouseX = 0,
-            mouseY = 0;
-        var windowHalfX, windowHalfY;
-        var knownBrainEdges = new Array();
-        var knownNodes = new Array();
-        var allLines = [];
-        var particleSystem;
-        var completeBrainParticleSystem;
-        var totalClusters = 0;
-
-        var locationMiddleX = 0;
-        var locationMiddleY = 0;
-        var locationMiddleZ = 65;
-        var collectionBrainCoordinates = new THREE.Geometry();
-        var nodes = new Array();
-        var clock = new THREE.Clock();
-        var mesh;
+    var collectionBrainCoordinates = new THREE.Geometry();
         var initialisedNodes = false;
         var initialisedEdges = false;
+var allLines = [];
+        var particleSystem;
+        var completeBrainParticleSystem;
+    init();
+    animate();
 
-        
-         
-    $(document).ready(function() {
-        init(); 
-    }); 
-      
-      var count=500;
-      var counter=setInterval(timer, 1); 
-
-    function timer()
-    {
-      count=count-1;
-      if (count <= 0)
-      {
-         clearInterval(counter);
-         //counter ended, do something here
-          document.getElementById("info").innerHTML="";
-          startLoadingData();
-         return;
-      }
-
-      //Do code for showing the number of seconds here
-         document.getElementById("timer").innerHTML=count + " miliseconds"; 
-    }
-      
-    function startLoadingData()
-      {
+      function myFunction(){
           
-        
-            var httpRequest = new XMLHttpRequest();
-            httpRequest.onreadystatechange = function() {
-                    processEdgesContent(httpRequest);
-                }
-                // Send the request
-            httpRequest.open("GET", 'edgesCoordinates.csv', true);
-            httpRequest.send(null);
-
-
-
-            var httpRequest2 = new XMLHttpRequest();
-            httpRequest2.onreadystatechange = function() {
-                    processNodesContent(httpRequest2);
-                }
-                // Send the request
-            httpRequest2.open("GET", 'node1sup.csv', true);
-            httpRequest2.send(null);
-        }
-    
-
+        var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
+        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+        var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2.position.x = 10;
+        cube2.position.y = 0;
+        cube2.position.z = 0;
+        scene.add( cube2 );
+      }
         function generateControllerUpperRight() {
             gui = new dat.GUI();
             var f2 = gui.addFolder('Min and max clusters');
@@ -155,41 +104,126 @@
             text.maximumCluster = totalClusters;
         }
 
-        function init() {
-            
-            renderer = new THREE.WebGLRenderer();
-            element = renderer.domElement;
-            container = document.getElementById('example');
-            container.appendChild(element);
-
-            
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.z = 500;
-
-            controls = new THREE.OrbitControls(camera);
-            controls.rotateSpeed = 0.6;
-            controls.target.z = locationMiddleZ;
-            controls.maxPolarAngle = Math.PI / 1.5;
+      
+    function init() {
+      renderer = new THREE.WebGLRenderer();
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
 
 
+      scene = new THREE.Scene();
 
-            window.addEventListener('resize', resize, false);
-            animate();
-            setTimeout(resize, 1);
+       camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.z = 500;
+
+      camera.position.set(0, 10, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+     // controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        locationMiddleX,
+        locationMiddleY,
+        locationMiddleZ
+      );
+      //controls.noZoom = false;
+      //controls.noPan = true;
+/*
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
         }
 
-        function resize() {
-            var width = container.offsetWidth;
-            var height = container.offsetHeight;
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
 
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
+        element.addEventListener('click', fullscreen, false);
 
-            renderer.setSize(width, height);
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);*/
 
+
+      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.5);
+      scene.add(light);
+
+      var texture = THREE.ImageUtils.loadTexture(
+        'textures/patterns/checker.png'
+      );
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat = new THREE.Vector2(50, 50);
+      texture.anisotropy = renderer.getMaxAnisotropy();
+
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0xffffff,
+        shininess: 20,
+        shading: THREE.FlatShading,
+        map: texture
+      });
+
+      var geometry = new THREE.PlaneGeometry(1000, 1000);
+
+      var mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.y = -80;
+      scene.add(mesh);
+
+        
+        
+
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+      
+       var count=500;
+      var counter=setInterval(timer, 1); 
+
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
+      
+      
+      function startLoadingData()
+      {
+          
+        
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                    processEdgesContent(httpRequest);
+                }
+                // Send the request
+            httpRequest.open("GET", 'edgesCoordinates.csv', true);
+            httpRequest.send(null);
+
+
+
+            var httpRequest2 = new XMLHttpRequest();
+            httpRequest2.onreadystatechange = function() {
+                    processNodesContent(httpRequest2);
+                }
+                // Send the request
+            httpRequest2.open("GET", 'node1sup.csv', true);
+            httpRequest2.send(null);
         }
+    
+
+      
         function addAllNodes()
         {
           //  return;
@@ -255,45 +289,56 @@
             generateControllerUpperRight();
         }
 
-        function update(dt) {
-            resize();
 
-            camera.updateProjectionMatrix();
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
 
-            controls.update(dt);
-        }
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
 
-        function render(dt) {
-            /*
-            for (var i = 0; i < totalClusters; i++) {
+      renderer.setSize(width, height);
+     
+    }
+
+    function update(dt) {
+      resize();
+
+      camera.updateProjectionMatrix();
+
+      controls.update(dt);
+    }
+
+    function render(dt) {
+        for (var i = 0; i < totalClusters; i++) {
                 if (i >= text.minimumCluster && i <= text.maximumCluster) {
                     allLines[i].visible = true;
                 } else {
                     allLines[i].visible = false;
                 }
-            }*/
-            renderer.render(scene, camera);
-        }
-
-        function animate(t) {
-            requestAnimationFrame(animate);
-
-            update(clock.getDelta());
-            render(clock.getDelta());
-        }
-
-        function fullscreen() {
-            if (container.requestFullscreen) {
-                container.requestFullscreen();
-            } else if (container.msRequestFullscreen) {
-                container.msRequestFullscreen();
-            } else if (container.mozRequestFullScreen) {
-                container.mozRequestFullScreen();
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
             }
-        }
-    </script>
-</body>
+      renderer.render(scene, camera);
+    }
 
+    function animate(t) {
+      requestAnimationFrame(animate);
+
+      update(clock.getDelta());
+      render(clock.getDelta());
+    }
+
+    function fullscreen() {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+        
+    }
+  </script>
+  </body>
 </html>
