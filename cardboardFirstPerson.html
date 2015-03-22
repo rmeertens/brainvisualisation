@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Cardboard Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        margin: 0px;
+        overflow: hidden;
+      }
+      #example {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+        #info {
+				position: absolute;
+				top: 50px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+    </style>
+  </head>
+  <body>
+      <div id="info"><font color="red">
+
+          Loading data in: <span id="timer"></span></font>
+		</div>
+    
+    <div id="example"></div>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+  <script src="js/third-party/threejs/three.min.js"></script>
+      <script src="js/FirstPersonControls.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+  <script src="js/brainvis.js"></script>
+<script src="js/Detector.js"></script>
+  <script>
+
+    if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+    // Variables for THREE JS
+    var camera, scene, renderer;
+    var effect, controls;
+    var element, container;
+      
+    // Statistics showing the frames per second
+    var stats;
+     var initialisedCamera = false;
+    var mouseX = 0,
+        mouseY = 0;
+    var windowHalfX, windowHalfY;
+    var knownBrainEdges = new Array();
+      var allLines = [];
+    var totalClusters = 0;         
+
+    var locationMiddleX = 0;
+    var locationMiddleY = 0;
+      var locationMiddleZ = 65;
+
+    var clock = new THREE.Clock();
+      var mesh;
+    //init();
+    //animate();
+    
+    $(document).ready(function() {
+        init(); 
+    }); 
+      
+      var count=100;
+      var counter=setInterval(timer, 1); 
+
+    function timer()
+    {
+      count=count-1;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingData();
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+    }
+      
+    function startLoadingData()
+      {
+          
+        
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            processEdgesContent(httpRequest);
+
+                
+            }
+            // Send the request
+        httpRequest.open("GET", 'edgesCoordinates.csv', true);
+        httpRequest.send(null);
+      }
+
+    function init() {
+        console.log("In the init function");
+      renderer = new THREE.WebGLRenderer();
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
+      
+
+      effect = new THREE.StereoEffect(renderer);
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+      camera.position.set(locationMiddleX, locationMiddleY, locationMiddleZ);
+      scene.add(camera);
+
+        
+      controls = new THREE.OrbitControls(camera, element);
+      controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        camera.position.x + 0.1,
+        camera.position.y,
+        camera.position.z
+      );
+      controls.noZoom = true;
+      controls.noPan = true;
+      
+        
+          
+   
+        
+      function setOrientationControls(e) {
+          console.log("Setting the orientation controls");
+        if (!e.alpha) {
+            console.log("no e.alpha");
+          return;
+        }
+          if(!initialisedCamera)
+          {
+              initialisedCamera = true;
+        console.log("setting and updating controls");
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
+              
+            
+          console.log("Adding event listener");
+        element.addEventListener('click', fullscreen, false);
+          console.log("removing event listener");
+        window.removeEventListener('deviceorientation', setOrientationControls);
+          }
+          else{
+            console.log("Error: trying to intialise camera a second time");   
+          }
+      }
+        
+      window.addEventListener('deviceorientation', setOrientationControls, true);
+
+
+      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
+      scene.add(light);
+
+      var texture = THREE.ImageUtils.loadTexture(
+        'textures/patterns/checker.png'
+      );
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat = new THREE.Vector2(50, 50);
+      texture.anisotropy = renderer.getMaxAnisotropy();
+
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0xffffff,
+        shininess: 20,
+        shading: THREE.FlatShading,
+        map: texture
+      });
+
+      var geometry = new THREE.PlaneGeometry(1000, 1000);
+
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+        mesh.position.y = -30;
+      scene.add(mesh);
+      
+        
+       var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
+        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
+        var cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2 = new THREE.Mesh( geometry2, material2 ); 
+        cube2.position.x = locationMiddleX;
+        cube2.position.y = locationMiddleY;
+        cube2.position.z = locationMiddleZ;
+        scene.add( cube2 );
+
+        
+          controls = new THREE.FirstPersonControls(camera);
+        controls.movementSpeed = 70.1;   
+        controls.lookSpeed = 0.001;
+        controls.lookVertical = true;
+         //controls.connect();
+       // controls.update();     
+        
+        
+        
+      //  addAllNodes();
+        animate();
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+        
+        
+        
+        
+        
+    }
+      function addAllNodes(){
+       
+        // Start adding all nodes
+         var geometryPerCluster = [];
+            var groupColors = [];
+            var particles = new THREE.Geometry();
+            var pMaterial = new THREE.ParticleSystemMaterial({
+                size: 0.5,
+                color: 0xffffff
+            });
+         // Initialise the clusters
+            for (var i = 0; i < totalClusters + 1; i++) {
+                geometryPerCluster[i] = new THREE.Geometry();
+                groupColors[i] = []
+            }
+        
+        
+         // Process all particles in the brainvis library
+            processParticles(geometryPerCluster, groupColors, particles);
+
+            // Add all particles
+            var geometry = new THREE.Geometry();
+            var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
+            scene.add(particleSystem, groupColors);
+        
+            // Add a color to each group of vertexes and add them to the scene
+        allLines = initialiseAllLines(totalClusters,groupColors,geometryPerCluster);
+        
+        for(var i=0;i<totalClusters;i++)
+        {
+            
+            scene.add(allLines[i]);
+        }   
+      }
+
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      effect.setSize(width, height);
+    }
+
+    function update(dt) {
+      resize();
+
+      camera.updateProjectionMatrix();
+
+      controls.update(dt);
+    }
+
+    function render(dt) {
+      effect.render(scene, camera);
+    }
+
+    function animate(t) {
+      requestAnimationFrame(animate);
+
+      update(clock.getDelta());
+      render(clock.getDelta());
+    }
+
+    function fullscreen() {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+    }
+  </script>
+  </body>
+</html>
