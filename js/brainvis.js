@@ -30,6 +30,14 @@ function processEdgesContent(httpRequest) {
     }
 }
 
+function getArraySingleNode(plainRow){
+    var result = new Array();
+	result[0] = plainRow[0] //x
+	result[1] = plainRow[1] //y
+    result[2] = plainRow[2] //z	
+    return result;
+}
+
 function processNodesContent(httpRequest) {
     
     if (httpRequest.readyState === 4){
@@ -40,10 +48,7 @@ function processNodesContent(httpRequest) {
             CSVContents = httpRequest.responseText;
             var data = $.csv.toArrays(CSVContents);
             for(var row=1; row < data.length; row++) {
-			   	nodes[row-1] = new Array();
-			    nodes[row-1][0] = data[row][1] //x
-			    nodes[row-1][1] = data[row][2] //y
-			    nodes[row-1][2] = data[row][3] //z	
+			   	nodes[row-1] = getArraySingleNode(data[row])
 			}
 			
 			knownBrainNodes = nodes;
