@@ -1,0 +1,14 @@
+<!-- home.html -->
+    <div class="jumbotron text-center">
+        <h1>Log in</h1>
+    
+  <div ng-show="authData">
+    <p>You are logged in as {{authData.github.displayName}}, and can now start uploading your own brain data </p>
+    <button ng-click="auth.$unauth()">Logout</button>
+  </div>
+  <div ng-hide="authData">
+    <p>Log in with Github to start uploading your own brain data</p>
+    <button ng-click="auth.$authWithOAuthRedirect('github')">Login With Github</button>
+  </div>
+</div>
+    </div>

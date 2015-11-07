@@ -1,0 +1,30 @@
+<!-- about.html -->
+<div class="jumbotron text-center">
+    <h1>My existing brains:</h1>
+    <h3>Edit {{ profile.$id }}</h3>
+    <li ng-repeat="meal in brains | orderBy:orderBy | filter:searchText">  
+        <div class="media">
+            <div class="media-left media-middle">   
+            <!-- <ng-if={{meal.mealimage}}>-->
+            <!--      <img class="media-object" src="{{meal.mealimage}}" alt="Look at how good this looks">-->
+            <!--        </ng-if>-->
+            </div>
+            <div class="media-body">
+                <!--<h4 class="media-heading">{{ meal.mealname }}</h4>
+                {{ meal.description }}-->
+            </div>
+        </div>
+    </li>
+
+    <!-- The part where adding a new brain starts -->
+    <h2>New brain:</h2>
+    <form ng-submit="addBrain()">
+        <div class="input-group">
+            <input type="text" ng-model="newbrainname" class="form-control" placeholder="Name brain" aria-describedby="sizing-addon2">
+        </div>
+        <div class="input-group">
+            <input type="text" ng-model="newbraindescription" class="form-control" placeholder="Short description of this brain" aria-describedby="sizing-addon2">
+        </div>
+        <input type="submit">
+    </form>
+</div>
