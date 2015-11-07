@@ -113,6 +113,7 @@ $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
         $scope.authData = authData;
         var brainsref = new Firebase("https://connectivityme.firebaseio.com/users/"+authData.uid+"/brains");
         $scope.brains = $firebaseArray(brainsref);
+        console.log($scope.brains)
         $scope.addBrain = function() {
             // $add on a synchronized array is like Array.push() except it saves to the database!
             $scope.brains.$add({
@@ -126,6 +127,7 @@ $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
                 }, function(error) {
                   console.log("Error: " + error);
             });
+            console.log($scope.brains)
         };
     });
     }]);
