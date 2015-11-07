@@ -1,7 +1,13 @@
+function getUrlOfBrain(var1,var2) {
+  return "http://rmeertens.github.io/brainvisualisation/brainOnlyEdges.html?username="+var1+"&brainid="+var2;
+}
+
+
 
     // create the module and name it lunchboxapp
         // also include ngRoute for all our routing needs
 var lunchboxapp = angular.module('lunchboxapp', ['ngRoute', 'firebase']);
+
 
 lunchboxapp.factory("Auth", ["$firebaseAuth", function ($firebaseAuth) {
     var ref = new Firebase("https://connectivityme.firebaseio.com");
@@ -114,6 +120,7 @@ $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
         var brainsref = new Firebase("https://connectivityme.firebaseio.com/users/"+authData.uid+"/brains");
         $scope.brains = $firebaseArray(brainsref);
         console.log($scope.brains)
+        $scope.geturl=getUrlOfBrain;
         $scope.addBrain = function() {
             // $add on a synchronized array is like Array.push() except it saves to the database!
             $scope.brains.$add({

@@ -9,3 +9,4 @@ function getQueryVariable(variable) {
   } 
   alert('Query Variable ' + variable + ' not found');
 }
+
