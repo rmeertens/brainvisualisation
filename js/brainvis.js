@@ -31,6 +31,19 @@ function startLoadingData(nameEdges, nameNodes)
     httpRequest2.onreadystatechange = function() {
             processNodesContent(httpRequest2);
         }
+    httpRequest2.onprogress = function(pe){
+        console.log("progress");   
+        console.log(pe.lengthComputable);
+        console.log(pe.loaded);
+        console.log(pe.total);
+        
+        
+        if(document.getElementById("loadingbar")){
+            document.getElementById("loadingbar").innerHTML="Loaded " + (pe.loaded/pe.total)*100 + " percent"; 
+        }
+          
+    
+    };
         // Send the request
     httpRequest2.open("GET", 'node1sup.csv', true);
     httpRequest2.send(null);
@@ -58,6 +71,7 @@ function generateControllerUpperRight()
     });
 
     minController.onChange(function(value) {
+        
         if (text.maximumCluster < value) {
             text.maximumCluster = value;
         }

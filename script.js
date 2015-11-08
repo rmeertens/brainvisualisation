@@ -113,13 +113,16 @@ $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
 
  
 
-  lunchboxapp.controller('addBrainController', ["$scope","$firebaseArray","Auth","Profile",function($scope,$firebaseArray,Auth,Profile) {
-    $scope.auth=Auth;        
+  lunchboxapp.controller('addBrainController', ["$scope","$firebaseArray","Auth","Profile","$document",function($scope,$firebaseArray,Auth,Profile,$document) {
+    $scope.auth=Auth;
+    $scope.loadingSpinnerVisible=true;        
     $scope.auth.$onAuth(function(authData) {
         $scope.authData = authData;
         var brainsref = new Firebase("https://connectivityme.firebaseio.com/users/"+authData.uid+"/brains");
         $scope.brains = $firebaseArray(brainsref);
+        $scope.brains.$loaded(function(data){$scope.loadingSpinnerVisible=false;});
         console.log($scope.brains)
+        
         $scope.geturl=getUrlOfBrain;
         $scope.addBrain = function() {
             // $add on a synchronized array is like Array.push() except it saves to the database!
