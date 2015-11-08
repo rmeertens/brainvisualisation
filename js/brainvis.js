@@ -30,11 +30,7 @@ function startLoadingData(nameEdges, nameNodes)
     var httpRequest2 = new XMLHttpRequest();
     console.log("httpRequest2");
     console.log(httpRequest2);
-    httpRequest2.onloadend = function(){
-           if(document.getElementById("loadingbar")){
-            document.getElementById("loadingbar").innerHTML=""; 
-        }
-    }
+    
     httpRequest2.onreadystatechange = function() {
             processNodesContent(httpRequest2);
         
@@ -45,13 +41,6 @@ function startLoadingData(nameEdges, nameNodes)
         console.log(pe.lengthComputable);
         console.log(pe.loaded);
         console.log(pe.total);
-        
-        
-        if(document.getElementById("loadingbar")){
-            document.getElementById("loadingbar").innerHTML="Loaded " + (pe.loaded/pe.total)*100 + " percent"; 
-        }
-          
-    
     };
         // Send the request
     httpRequest2.open("GET", 'node1sup.csv', true);
