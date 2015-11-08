@@ -28,8 +28,17 @@ function startLoadingData(nameEdges, nameNodes)
 
 
     var httpRequest2 = new XMLHttpRequest();
+    console.log("httpRequest2");
+    console.log(httpRequest2);
+    httpRequest2.onloadend = function(){
+           if(document.getElementById("loadingbar")){
+            document.getElementById("loadingbar").innerHTML=""; 
+        }
+    }
     httpRequest2.onreadystatechange = function() {
             processNodesContent(httpRequest2);
+        
+     
         }
     httpRequest2.onprogress = function(pe){
         console.log("progress");   
