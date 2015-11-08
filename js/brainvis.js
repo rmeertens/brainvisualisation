@@ -96,6 +96,56 @@ function addFloorAndLight(){
    
 }
 
+  
+    function normalCameraInit() {
+      renderer = new THREE.WebGLRenderer();
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
+
+
+      scene = new THREE.Scene();
+
+       camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+      camera.position.set(0, 10, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+      controls.target.set(
+        locationMiddleX,
+        locationMiddleY,
+        locationMiddleZ
+      );
+      controls.noZoom = false;
+      controls.noPan = false;
+
+        addFloorAndLight();
+
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+      
+
+  function startLoadingTimer()
+    {
+      count=count-10;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingDataUsingFirebase();
+        
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+        if(document.getElementById("timer")){
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+        }
+    }
+      
+
 function processEdgesContent(httpRequest) {
     //console.log("proecessing edges");
     var edges = new Array();
