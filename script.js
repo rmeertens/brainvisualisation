@@ -127,7 +127,8 @@ $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
                 from: $scope.authData.uid,
                 name: $scope.newbrainname,
                 description:$scope.newbraindescription,
-                dataurl:'edgesCoordinates.csv',
+                edgesurl:'edgesCoordinates.csv',
+                nodesurl:'node1sup.csv',
                 timestamp: Firebase.ServerValue.TIMESTAMP
             }).then(function(reffer){
                 console.log("Just added a brain");
