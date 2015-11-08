@@ -176,13 +176,11 @@
          clearInterval(counter);
          //counter ended, do something here
           startLoadingDataUsingFirebase();
-}); 
-          
-         return;
       }
-
       //Do code for showing the number of seconds here
-        document.getElementById("timer").innerHTML=count + " miliseconds"; 
+        if(document.getElementById("timer")){
+            document.getElementById("timer").innerHTML=count + " miliseconds"; 
+        }
     }
       
       

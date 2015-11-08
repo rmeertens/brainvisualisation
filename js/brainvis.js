@@ -1,3 +1,43 @@
+
+function startLoadingDataUsingFirebase(){
+    document.getElementById("info").innerHTML="";
+    var username = getQueryVariable("username");//github%3A5749627
+    var brainid = getQueryVariable("brainid");//-K2TobPHJzU_8AqK9r3U
+    var urlthing="https://connectivityme.firebaseio.com/users/"+username+"/brains";
+    var myFirebaseRef = new Firebase(urlthing);
+    myFirebaseRef.child(brainid).on("value",      
+       function(snapshot) {
+            startLoadingData(snapshot.val().edgesurl,snapshot.val().nodesurl);
+    }   );
+}
+                                                  
+function startLoadingData(nameEdges, nameNodes)
+{
+    console.log(nameEdges+" nodes: "+nameNodes);
+
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+            processEdgesContent(httpRequest);
+        }
+        // Send the request
+    httpRequest.open("GET", 'edgesCoordinates.csv', true);
+    httpRequest.send(null);
+
+
+
+    var httpRequest2 = new XMLHttpRequest();
+    httpRequest2.onreadystatechange = function() {
+            processNodesContent(httpRequest2);
+        }
+        // Send the request
+    httpRequest2.open("GET", 'node1sup.csv', true);
+    httpRequest2.send(null);
+}
+
+    
+    
+
+
 function processEdgesContent(httpRequest) {
     //console.log("proecessing edges");
     var edges = new Array();
