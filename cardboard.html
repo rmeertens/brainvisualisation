@@ -33,14 +33,17 @@
 		</div>
     
     <div id="example"></div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
-  <script src="js/third-party/threejs/three.min.js"></script>
-  <script src="js/third-party/threejs/StereoEffect.js"></script>
-  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-  <script src="js/third-party/threejs/OrbitControls.js"></script>
-  <script src="js/brainvis.js"></script>
-<script src="js/Detector.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.csv.js"></script>
+    <script src="js/third-party/threejs/three.min.js"></script>
+    <script src="js/third-party/threejs/StereoEffect.js"></script>
+    <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+    <script src="js/brainvis.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="js/third-party/threejs/OrbitControls.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/useful.js"></script>
+    <script src="js/Detector.js"></script>
   <script>
 
     if (!Detector.webgl) Detector.addGetWebGLMessage();
@@ -49,23 +52,23 @@
     var camera, scene, renderer;
     var effect, controls;
     var element, container;
-      
+
     // Statistics showing the frames per second
     var stats;
-     var initialisedCamera = false;
+    var initialisedCamera = false;
     var mouseX = 0,
-        mouseY = 0;
+    var mouseY = 0;
     var windowHalfX, windowHalfY;
     var knownBrainEdges = new Array();
-      var allLines = [];
+    var allLines = [];
     var totalClusters = 0;         
 
     var locationMiddleX = 0;
     var locationMiddleY = 0;
-      var locationMiddleZ = 65;
+    var locationMiddleZ = 65;
 
     var clock = new THREE.Clock();
-      var mesh;
+    var mesh;
     //init();
     //animate();
     
@@ -74,38 +77,7 @@
     }); 
       
       var count=500;
-      var counter=setInterval(timer, 1); 
-
-    function timer()
-    {
-      count=count-1;
-      if (count <= 0)
-      {
-         clearInterval(counter);
-         //counter ended, do something here
-          document.getElementById("info").innerHTML="";
-          startLoadingData();
-         return;
-      }
-
-      //Do code for showing the number of seconds here
-         document.getElementById("timer").innerHTML=count + " miliseconds"; 
-    }
-      
-    function startLoadingData()
-      {
-          
-        
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function() {
-            processEdgesContent(httpRequest);
-
-                
-            }
-            // Send the request
-        httpRequest.open("GET", 'edgesCoordinates.csv', true);
-        httpRequest.send(null);
-      }
+    var counter=setInterval(startLoadingTimer, 1); 
 
     function init() {
         console.log("In the init function");
@@ -160,9 +132,9 @@
 
     addFloorAndLight();
     
-    animate();
-      window.addEventListener('resize', resize, false);
-      setTimeout(resize, 1);
+      animate();
+      window.addEventListener('resize', effectResize, false);
+      setTimeout(effectResize, 1);
     }
       function addAllNodes(){
        
@@ -199,7 +171,8 @@
         }   
       }
 
-    function resize() {
+ 
+   function effectResize() {
       var width = container.offsetWidth;
       var height = container.offsetHeight;
 
@@ -211,7 +184,7 @@
     }
 
     function update(dt) {
-      resize();
+      effectResize();
 
       camera.updateProjectionMatrix();
 

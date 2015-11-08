@@ -80,40 +80,32 @@
       function addAllNodes(){
             
         // Start adding all nodes
-         var geometryPerCluster = [];
-            var groupColors = [];
-            var particles = new THREE.Geometry();
-            
-         // Initialise the clusters
-            for (var i = 0; i < totalClusters + 1; i++) {
-                geometryPerCluster[i] = new THREE.Geometry();
-                groupColors[i] = []
-            }
-        
-        
-         // Process all particles in the brainvis library
-            processParticles(geometryPerCluster, groupColors, particles);
+        var geometryPerCluster = [];
+        var groupColors = [];
+        var particles = new THREE.Geometry();
 
-
-            // Add all particles
-            var geometry = new THREE.Geometry();
-            var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
-            scene.add(particleSystem, groupColors);
+        // Initialise the clusters
+        for (var i = 0; i < totalClusters + 1; i++) {
+            geometryPerCluster[i] = new THREE.Geometry();
+            groupColors[i] = []
+        }
         
-            // Add a color to each group of vertexes and add them to the scene
+        // Process all particles in the brainvis library
+        processParticles(geometryPerCluster, groupColors, particles);
+
+        // Add all particles
+        var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
+        scene.add(particleSystem, groupColors);
+        // Add a color to each group of vertexes and add them to the scene
         allLines = initialiseAllLines(totalClusters,groupColors,geometryPerCluster);
-        
         for(var i=0;i<totalClusters;i++)
-        {
-            
+        {   
             scene.add(allLines[i]);
-        } 
+        }
            
-          // Add the changable parameters					
-          generateControllerUpperRight();
-    
-
-      }
+        // Add the changable parameters					
+        generateControllerUpperRight();
+    }
 
     function update(dt) {
       resize();

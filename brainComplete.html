@@ -84,7 +84,6 @@
         if (!(initialisedEdges && initialisedNodes)) {
             return;
         }
-        console.log("Now adding all nodes and edges");
 
         // Start adding all nodes
         var geometryPerCluster = [];
@@ -101,11 +100,12 @@
         processParticles(geometryPerCluster, groupColors, particles);
 
         // Add all particles
-        completeBrainParticleSystem = new THREE.ParticleSystem(particles, pMaterial);
+        var particleSystem = new THREE.ParticleSystem(particles, pMaterial);
         scene.add(particleSystem, groupColors);
-
-        allLines = initialiseAllLines(totalClusters, groupColors, geometryPerCluster);
-        for (var i = 0; i < totalClusters; i++) {
+        // Add a color to each group of vertexes and add them to the scene
+        allLines = initialiseAllLines(totalClusters,groupColors,geometryPerCluster);
+        for(var i=0;i<totalClusters;i++)
+        {   
             scene.add(allLines[i]);
         }
 
