@@ -7,7 +7,18 @@ function getQueryVariable(variable) {
       return pair[1];
     }
   } 
-  alert('Query Variable ' + variable + ' not found');
+//  alert('Query Variable ' + variable + ' not found');
 }
 
 
+
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+     
+    }

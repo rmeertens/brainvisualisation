@@ -32,15 +32,15 @@
 
           Loading data in: <span id="timer"></span></font>
     </div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.csv.js"></script>
     <script src="js/third-party/threejs/three.min.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
     <script src="js/brainvis.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script src="js/third-party/threejs/OrbitControls.js"></script>
-    <script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+    <script src="js/firebase.js"></script>
     <script src="js/useful.js"></script>
 
 
@@ -58,37 +58,22 @@
     var locationMiddleY = 0;
     var locationMiddleZ = 65;
 
+    var nodes = new Array();
+
+    var collectionBrainCoordinates = new THREE.Geometry();
+    var initialisedNodes = false;
+    var initialisedEdges = false;
+    var allLines = [];
+    var particleSystem;
+    var completeBrainParticleSystem;
+    var count=500;
+    var counter=setInterval(timer, 1); 
+
     init();
     animate();
 
 
-       function generateControllerUpperRight()
-        {
-            gui = new dat.GUI();
-            var f2 = gui.addFolder('Min and max clusters');
-            var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
-            var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
-            var isBrainOn = f2.add(text,"displayCompleteBrain");
-            f2.open();
-
-            isBrainOn.onChange(function(value)
-            {
-                completeBrainParticleSystem.visible = text.displayCompleteBrain;
-                
-            });
-            maxController.onChange(function(value) {
-                if (text.minimumCluster > value) {
-                    text.minimumCluster = value;
-                }
-            });
-
-            minController.onChange(function(value) {
-                if (text.maximumCluster < value) {
-                    text.maximumCluster = value;
-                }
-            });
-            text.maximumCluster = totalClusters;
-        }
+       
     function init() {
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
@@ -103,69 +88,21 @@
       scene.add(camera);
 
       controls = new THREE.OrbitControls(camera, element);
-     // controls.rotateUp(Math.PI / 4);
       controls.target.set(
         locationMiddleX,
         locationMiddleY,
         locationMiddleZ
       );
-      //controls.noZoom = false;
-      //controls.noPan = true;
-/*
-      function setOrientationControls(e) {
-        if (!e.alpha) {
-          return;
-        }
+      controls.noZoom = false;
+      controls.noPan = false;
 
-        controls = new THREE.DeviceOrientationControls(camera, true);
-        controls.connect();
-        controls.update();
-
-        element.addEventListener('click', fullscreen, false);
-
-        window.removeEventListener('deviceorientation', setOrientationControls, true);
-      }
-      window.addEventListener('deviceorientation', setOrientationControls, true);*/
-
-
-      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.5);
-      scene.add(light);
-
-      var texture = THREE.ImageUtils.loadTexture(
-        'textures/patterns/checker.png'
-      );
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat = new THREE.Vector2(50, 50);
-      texture.anisotropy = renderer.getMaxAnisotropy();
-
-      var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        specular: 0xffffff,
-        shininess: 20,
-        shading: THREE.FlatShading,
-        map: texture
-      });
-
-      var geometry = new THREE.PlaneGeometry(1000, 1000);
-
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = -80;
-      scene.add(mesh);
-
-        
-        
+addFloorAndLight();
 
       window.addEventListener('resize', resize, false);
       setTimeout(resize, 1);
     }
       
-       var count=500;
-      var counter=setInterval(timer, 1); 
-
-      
-
+    
       
 
     function timer()
@@ -175,11 +112,15 @@
       {
          clearInterval(counter);
          //counter ended, do something here
+          document.getElementById("info").innerHTML="";
           startLoadingDataUsingFirebase();
+        //  startLoadingData();
+         return;
       }
+
       //Do code for showing the number of seconds here
         if(document.getElementById("timer")){
-            document.getElementById("timer").innerHTML=count + " miliseconds"; 
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
         }
     }
       
@@ -198,7 +139,7 @@
       }
       
       function addAllNodes(){
-       
+            
         // Start adding all nodes
          var geometryPerCluster = [];
             var groupColors = [];
@@ -232,22 +173,11 @@
             scene.add(allLines[i]);
         } 
            
-               // Add the changable parameters					
-    generateControllerUpperRight();
+          // Add the changable parameters					
+          generateControllerUpperRight();
     
 
       }
-
-    function resize() {
-      var width = container.offsetWidth;
-      var height = container.offsetHeight;
-
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(width, height);
-     
-    }
 
     function update(dt) {
       resize();

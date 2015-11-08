@@ -32,16 +32,17 @@
 
           Loading data in: <span id="timer"></span></font>
     </div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
+   <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.csv.js"></script>
     <script src="js/third-party/threejs/three.min.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
     <script src="js/brainvis.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script src="js/third-party/threejs/OrbitControls.js"></script>
-    <script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+    <script src="js/firebase.js"></script>
     <script src="js/useful.js"></script>
+
 
 
   <script>
@@ -70,33 +71,7 @@
     animate();
 
 
-       function generateControllerUpperRight()
-        {
-            gui = new dat.GUI();
-            var f2 = gui.addFolder('Min and max clusters');
-            var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
-            var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
-            var isBrainOn = f2.add(text,"displayCompleteBrain");
-            f2.open();
-
-            isBrainOn.onChange(function(value)
-            {
-                completeBrainParticleSystem.visible = text.displayCompleteBrain;
-                
-            });
-            maxController.onChange(function(value) {
-                if (text.minimumCluster > value) {
-                    text.minimumCluster = value;
-                }
-            });
-
-            minController.onChange(function(value) {
-                if (text.maximumCluster < value) {
-                    text.maximumCluster = value;
-                }
-            });
-            text.maximumCluster = totalClusters;
-        }
+     
     function init() {
       renderer = new THREE.WebGLRenderer();
       element = renderer.domElement;
@@ -104,64 +79,22 @@
       container.appendChild(element);
 
 
-      scene = new THREE.Scene();
+        scene = new THREE.Scene();
 
-       camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-      camera.position.set(0, 10, 0);
-      scene.add(camera);
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.set(0, 10, 0);
+        scene.add(camera);
 
-      controls = new THREE.OrbitControls(camera, element);
-     // controls.rotateUp(Math.PI / 4);
+        controls = new THREE.OrbitControls(camera, element);
       controls.target.set(
         locationMiddleX,
         locationMiddleY,
         locationMiddleZ
       );
-      //controls.noZoom = false;
-      //controls.noPan = true;
-/*
-      function setOrientationControls(e) {
-        if (!e.alpha) {
-          return;
-        }
+      controls.noZoom = false;
+      controls.noPan = false;
 
-        controls = new THREE.DeviceOrientationControls(camera, true);
-        controls.connect();
-        controls.update();
-
-        element.addEventListener('click', fullscreen, false);
-
-        window.removeEventListener('deviceorientation', setOrientationControls, true);
-      }
-      window.addEventListener('deviceorientation', setOrientationControls, true);*/
-
-
-      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.5);
-      scene.add(light);
-
-      var texture = THREE.ImageUtils.loadTexture(
-        'textures/patterns/checker.png'
-      );
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat = new THREE.Vector2(50, 50);
-      texture.anisotropy = renderer.getMaxAnisotropy();
-
-      var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        specular: 0xffffff,
-        shininess: 20,
-        shading: THREE.FlatShading,
-        map: texture
-      });
-
-      var geometry = new THREE.PlaneGeometry(1000, 1000);
-
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = -80;
-      scene.add(mesh);
-
+        addFloorAndLight();
         
         
 
@@ -169,12 +102,8 @@
       setTimeout(resize, 1);
     }
       
-       var count=500;
-      var counter=setInterval(timer, 1); 
-
-      
-
-
+    var count=500;
+    var counter=setInterval(timer, 1);
     function timer()
     {
       count=count-10;
@@ -184,93 +113,67 @@
          //counter ended, do something here
           document.getElementById("info").innerHTML="";
           startLoadingDataUsingFirebase();
-        //  startLoadingData();
+        
          return;
       }
 
       //Do code for showing the number of seconds here
+        if(document.getElementById("timer")){
          document.getElementById("timer").innerHTML=count + " miliseconds"; 
+        }
     }
       
+      var pMaterial = new THREE.ParticleSystemMaterial({
+                size: 0.5,
+                color: 0xffffff
+            });
       
       
-      
-        function addAllNodes()
-        {
-          //  return;
-            if (!(initialisedEdges && initialisedNodes)) {
-                return;
-            }
-            console.log("Now adding all nodes");
-            
+    function addAllNodes()
+    {
+        //  return;
+        if (!(initialisedEdges && initialisedNodes)) {
+            return;
+        }
+        console.log("Now adding all nodes and edges");
+
         // Start adding all nodes
-         var geometryPerCluster = [];
-            var groupColors = [];
-            var particles = new THREE.Geometry();
-            var pMaterial = new THREE.ParticleSystemMaterial({
-                size: 0.5,
-                color: 0xffffff
-            });
-         // Initialise the clusters
-            for (var i = 0; i < totalClusters + 1; i++) {
-                geometryPerCluster[i] = new THREE.Geometry();
-                groupColors[i] = []
-            }
-         // Process all particles in the brainvis library
-            processParticles(geometryPerCluster, groupColors, particles);
+        var geometryPerCluster = [];
+        var groupColors = [];
+        var particles = new THREE.Geometry();
 
+        // Initialise the clusters
+        for (var i = 0; i < totalClusters + 1; i++) {
+            geometryPerCluster[i] = new THREE.Geometry();
+            groupColors[i] = []
+        }
+        
+        // Process all particles in the brainvis library
+        processParticles(geometryPerCluster, groupColors, particles);
 
-            // Add all particles
-            var geometry = new THREE.Geometry();
-            completeBrainParticleSystem = new THREE.ParticleSystem(particles, pMaterial);
-            scene.add(particleSystem, groupColors);
+        // Add all particles
+        completeBrainParticleSystem = new THREE.ParticleSystem(particles, pMaterial);
+        scene.add(particleSystem, groupColors);
 
-            allLines = initialiseAllLines(totalClusters, groupColors, geometryPerCluster);
-
-            for (var i = 0; i < totalClusters; i++) {
-
-                scene.add(allLines[i]);
-            }
-            
-
-            // Initialise the brain particles
-            var geometryPerCluster = [];
-            var groupColors = [];
-
-            var pMaterial = new THREE.ParticleSystemMaterial({
-                size: 0.5,
-                color: 0xffffff
-            });
-            
-            // Initialise the clusters
-            for (var i = 0; i < totalClusters + 1; i++) {
-                geometryPerCluster[i] = new THREE.Geometry();
-                groupColors[i] = []
-            }
-            for (var row = 0; row < nodes.length; row++) {
-                particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
-                collectionBrainCoordinates.vertices.push(particle);
-            }
-            // Add all particles
-            var geometry = new THREE.Geometry();
-            completeBrainParticleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
-            scene.add(completeBrainParticleSystem, groupColors);
-         
-            // Add the changable parameters					
-            generateControllerUpperRight();
+        allLines = initialiseAllLines(totalClusters, groupColors, geometryPerCluster);
+        for (var i = 0; i < totalClusters; i++) {
+            scene.add(allLines[i]);
         }
 
+        // Initialise the brain particle
+        for (var row = 0; row < nodes.length; row++) {
+            particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
+            collectionBrainCoordinates.vertices.push(particle);
+        }
+        // Add all particles
+        completeBrainParticleSystem = new THREE.ParticleSystem(collectionBrainCoordinates, pMaterial);
+        scene.add(completeBrainParticleSystem, groupColors);
 
-    function resize() {
-      var width = container.offsetWidth;
-      var height = container.offsetHeight;
-
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(width, height);
-     
+        // Add the changable parameters					
+        generateControllerUpperRight();
     }
+
+
 
     function update(dt) {
       resize();
