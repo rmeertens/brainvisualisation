@@ -38,15 +38,16 @@
 
     <!-- The part where adding a new brain starts -->
     <h2>New brain:</h2>
-    <form ng-submit="addBrain()">
+    <form action="http://localhost/upload" method="post" enctype=multipart/form-data ng-submit="addBrain()">
         <div class="input-group">
-            <input type="text" ng-model="newbrainname" class="form-control" placeholder="Name brain" aria-describedby="sizing-addon2">
+            <input type="text" ng-model="newbrainname" class="form-control" placeholder="Name brain" aria-describedby="sizing-addon2" name="newbrainname">
         </div>
         <div class="input-group">
-            <input type="text" ng-model="newbraindescription" class="form-control" placeholder="Short description of this brain" aria-describedby="sizing-addon2">
+            <input type="text" ng-model="newbraindescription" class="form-control" placeholder="Short description of this brain" aria-describedby="sizing-addon2" name="newbraindescription">
+        </div>
+        <div class="input-group">
+           <input type=file name=file>
         </div>
         <input type="submit">
     </form>
-</div>
-
 </div>
