@@ -33,14 +33,18 @@
 		</div>
     
     <div id="example"></div>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//jquery-csv.googlecode.com/git/src/jquery.csv.js"></script>
-  <script src="js/third-party/threejs/three.min.js"></script>
-  <script src="js/third-party/threejs/StereoEffect.js"></script>
-  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-  <script src="js/third-party/threejs/OculusRiftEffect.js"></script>
-  <script src="js/third-party/threejs/OrbitControls.js"></script>
-  <script src="js/brainvis.js"></script>
+  
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.csv.js"></script>
+    <script src="js/third-party/threejs/three.min.js"></script>
+      <script src="js/third-party/threejs/OculusRiftEffect.js"></script>
+    <script src="js/third-party/threejs/StereoEffect.js"></script>
+    <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+    <script src="js/brainvis.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="js/third-party/threejs/OrbitControls.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/useful.js"></script>
 <script src="js/Detector.js"></script>
   <script>
 
@@ -50,23 +54,23 @@
     var camera, scene, renderer;
     var effect, controls;
     var element, container;
-      
+
     // Statistics showing the frames per second
     var stats;
-     var initialisedCamera = false;
+    var initialisedCamera = false;
     var mouseX = 0,
-        mouseY = 0;
+    var mouseY = 0;
     var windowHalfX, windowHalfY;
     var knownBrainEdges = new Array();
-      var allLines = [];
+    var allLines = [];
     var totalClusters = 0;         
 
     var locationMiddleX = 0;
     var locationMiddleY = 0;
-      var locationMiddleZ = 65;
+    var locationMiddleZ = 65;
 
     var clock = new THREE.Clock();
-      var mesh;
+    var mesh;
     //init();
     //animate();
     
@@ -75,38 +79,8 @@
     }); 
       
       var count=500;
-      var counter=setInterval(timer, 1); 
-
-    function timer()
-    {
-      count=count-1;
-      if (count <= 0)
-      {
-         clearInterval(counter);
-         //counter ended, do something here
-          document.getElementById("info").innerHTML="";
-          startLoadingData();
-         return;
-      }
-
-      //Do code for showing the number of seconds here
-         document.getElementById("timer").innerHTML=count + " miliseconds"; 
-    }
+      var counter=setInterval(startLoadingTimer, 1); 
       
-    function startLoadingData()
-      {
-          
-        
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function() {
-            processEdgesContent(httpRequest);
-
-                
-            }
-            // Send the request
-        httpRequest.open("GET", 'edgesCoordinates.csv', true);
-        httpRequest.send(null);
-      }
 
     function init() {
         console.log("In the init function");
@@ -157,43 +131,7 @@
       window.addEventListener('deviceorientation', setOrientationControls, true);
 
 
-      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
-      scene.add(light);
-
-      var texture = THREE.ImageUtils.loadTexture(
-        'textures/patterns/checker.png'
-      );
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat = new THREE.Vector2(50, 50);
-      texture.anisotropy = renderer.getMaxAnisotropy();
-
-      var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        specular: 0xffffff,
-        shininess: 20,
-        shading: THREE.FlatShading,
-        map: texture
-      });
-
-      var geometry = new THREE.PlaneGeometry(1000, 1000);
-
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-        mesh.position.y = -30;
-      scene.add(mesh);
-      
-        
-       var geometry2 = new THREE.BoxGeometry( 1, 1, 1 ); 
-        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
-        var cube2 = new THREE.Mesh( geometry2, material2 ); 
-        cube2 = new THREE.Mesh( geometry2, material2 ); 
-        cube2.position.x = locationMiddleX;
-        cube2.position.y = locationMiddleY;
-        cube2.position.z = locationMiddleZ;
-        scene.add( cube2 );
-
-        
+     addFloorAndLight();
         
       //  addAllNodes();
         animate();

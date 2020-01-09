@@ -1,3 +1,163 @@
+
+function startLoadingDataUsingFirebase(){
+    startLoadingData('edgesCoordinates.csv','nodes1sup.csv');
+    document.getElementById("info").innerHTML="";
+    var username = getQueryVariable("username");//github%3A5749627
+    var brainid = getQueryVariable("brainid");//-K2TobPHJzU_8AqK9r3U
+    var urlthing="https://connectivityme.firebaseio.com/users/"+username+"/brains";
+    var myFirebaseRef = new Firebase(urlthing);
+    
+    myFirebaseRef.child(brainid).on("value",      
+       function(snapshot) {
+            //startLoadingData(snapshot.val().edgesurl,snapshot.val().nodesurl);
+    }   );
+}
+                                                  
+function startLoadingData(nameEdges, nameNodes)
+{
+    console.log(nameEdges+" nodes: "+nameNodes);
+
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+            processEdgesContent(httpRequest);
+        }
+        // Send the request
+    httpRequest.open("GET", 'edgesCoordinates.csv', true);
+    httpRequest.send(null);
+
+
+
+    var httpRequest2 = new XMLHttpRequest();
+    console.log("httpRequest2");
+    console.log(httpRequest2);
+    
+    httpRequest2.onreadystatechange = function() {
+            processNodesContent(httpRequest2);
+        
+     
+        }
+    httpRequest2.onprogress = function(pe){
+        console.log("progress");   
+        console.log(pe.lengthComputable);
+        console.log(pe.loaded);
+        console.log(pe.total);
+    };
+        // Send the request
+    httpRequest2.open("GET", 'node1sup.csv', true);
+    httpRequest2.send(null);
+}
+
+
+function generateControllerUpperRight()
+{
+    gui = new dat.GUI();
+    var f2 = gui.addFolder('Min and max clusters');
+    var minController = f2.add(text, 'minimumCluster', 0, totalClusters).step(1).listen();
+    var maxController = f2.add(text, 'maximumCluster', 0, totalClusters).step(1).listen();
+    var isBrainOn = f2.add(text,"displayCompleteBrain");
+    f2.open();
+
+    isBrainOn.onChange(function(value)
+    {
+        completeBrainParticleSystem.visible = text.displayCompleteBrain;
+
+    });
+    maxController.onChange(function(value) {
+        if (text.minimumCluster > value) {
+            text.minimumCluster = value;
+        }
+    });
+
+    minController.onChange(function(value) {
+        
+        if (text.maximumCluster < value) {
+            text.maximumCluster = value;
+        }
+    });
+    text.maximumCluster = totalClusters;
+}
+    
+    
+
+function addFloorAndLight(){
+      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.5);
+      scene.add(light);
+
+      var texture = THREE.ImageUtils.loadTexture(
+        'textures/patterns/checker.png'
+      );
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat = new THREE.Vector2(50, 50);
+      texture.anisotropy = renderer.getMaxAnisotropy();
+
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0xffffff,
+        shininess: 20,
+        shading: THREE.FlatShading,
+        map: texture
+      });
+
+      var geometry = new THREE.PlaneGeometry(1000, 1000);
+
+      var mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.y = -80;
+      scene.add(mesh);
+   
+}
+
+  
+    function normalCameraInit() {
+      renderer = new THREE.WebGLRenderer();
+      element = renderer.domElement;
+      container = document.getElementById('example');
+      container.appendChild(element);
+
+
+      scene = new THREE.Scene();
+
+       camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+      camera.position.set(0, 10, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+      controls.target.set(
+        locationMiddleX,
+        locationMiddleY,
+        locationMiddleZ
+      );
+      controls.noZoom = false;
+      controls.noPan = false;
+
+        addFloorAndLight();
+
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+    }
+      
+
+  function startLoadingTimer()
+    {
+      count=count-10;
+      if (count <= 0)
+      {
+         clearInterval(counter);
+         //counter ended, do something here
+          document.getElementById("info").innerHTML="";
+          startLoadingDataUsingFirebase();
+        
+         return;
+      }
+
+      //Do code for showing the number of seconds here
+        if(document.getElementById("timer")){
+         document.getElementById("timer").innerHTML=count + " miliseconds"; 
+        }
+    }
+      
+
 function processEdgesContent(httpRequest) {
     //console.log("proecessing edges");
     var edges = new Array();

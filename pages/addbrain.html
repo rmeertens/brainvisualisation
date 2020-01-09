@@ -1,0 +1,53 @@
+<!-- about.html -->
+<div class="jumbotron text-center">
+    <h1>Upload it yourself</h1>
+</div>
+<div class="container">
+    <h1>My existing brains:</h1>
+<div ng-show=loadingSpinnerVisible>
+    <i id="loadingspinner" class="fa fa-cog fa-5x fa-spin" stylevisibility=hidden></i><h3>Loading your data</h3>
+</div>
+    <li ng-repeat="brain in brains | orderBy:orderBy | filter:searchText">  
+
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-6 col-md-6">
+                    <div class="well well-sm">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-4">
+                                <img src={{authData.github.profileImageURL}} alt="" class="img-rounded img-responsive" />
+                            </div>
+                            <div class="col-sm-6 col-md-8">
+                        <h4> {{authData.github.displayName}}</h4>
+                        <p>
+                            <i class="glyphicon glyphicon-envelope"></i>{{profile.email}}
+                            <br />
+                            <i class="glyphicon glyphicon-envelope"></i>    {{profile.affiliation}}
+                            <br />
+                            <i class="glyphicon glyphicon-globe"></i><a href={{geturl(meal.from,meal.id)}}>{{geturl(meal.from,meal.id)}}</a>
+                            <br />
+                            <i class="glyphicon glyphicon-gift"></i>Description: {{ meal.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+        
+    </li>
+
+    <!-- The part where adding a new brain starts -->
+    <h2>New brain:</h2>
+    <form action="http://localhost/upload" method="post" enctype=multipart/form-data ng-submit="addBrain()">
+        <div class="input-group">
+            <input type="text" ng-model="newbrainname" class="form-control" placeholder="Name brain" aria-describedby="sizing-addon2" name="newbrainname">
+        </div>
+        <div class="input-group">
+            <input type="text" ng-model="newbraindescription" class="form-control" placeholder="Short description of this brain" aria-describedby="sizing-addon2" name="newbraindescription">
+        </div>
+        <div class="input-group">
+           <input type=file name=file>
+        </div>
+        <input type="submit">
+    </form>
+</div>
