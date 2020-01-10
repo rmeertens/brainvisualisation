@@ -181,19 +181,11 @@ function init() {
     var painter1 = new TubePainter();
     var painter2 = new TubePainter();
     
-    
-//    controller1.userData.painter = painter1;
-    
-//    scene.add( painter1.mesh );
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
-//    controller2.userData.painter = painter2;
-
-    
-    
-//    scene.add( painter2.mesh );
     scene.add( controller2 );
+    
     controller2.addEventListener( 'selectstart', onSelectStartRight );
     controller2.addEventListener( 'selectend', onSelectEndRight );
     
@@ -233,8 +225,8 @@ function handleController2( controller ) {
 function animate() {
     renderer.setAnimationLoop( function () {
         
-        handleController1( controller1 );
-// handleController2( controller2 );
+    handleController1( controller1 );
+    handleController2( controller2 );
         
         if (selectionDirection != 0.0){
             console.log(controller1);
