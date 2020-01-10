@@ -65,12 +65,13 @@ function startLoadingData()
 //                console.log(ints);
 
 
-                for(var row=0; row < ints.length; row=row+3) {
+                for(var row=0; row < ints.length; row=row+4) {
 
-                    nodes[row/3] = new Array();
-                    nodes[row/3][0] = ints[row] //x
-                    nodes[row/3][1] = ints[row+1] //y
-                    nodes[row/3][2] = ints[row+2] //z	
+                    nodes[row/4] = new Array();
+                    nodes[row/4][0] = ints[row] //x
+                    nodes[row/4][1] = ints[row+1] //y
+                    nodes[row/4][2] = ints[row+2] //z
+                    nodes[row/4][3] = ints[row+3] //i
                 }
 //                console.log(nodes)
 
