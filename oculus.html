@@ -30,8 +30,9 @@ var collectionBrainCoordinates = new THREE.Geometry();
 var controller1, controller2;
 
 var points;     
-var isSelecting = false;
-      			var cursor = new THREE.Vector3();
+var selectionDirection = 0.0;
+
+var cursor = new THREE.Vector3();
 
 init();
 animate();
@@ -119,13 +120,20 @@ function startLoadingData()
     }
       
  function onSelectStart(){
-    console.log("started selection");
-    isSelecting = true;
+    selectionDirection = 1.0;
+     
  }
  function onSelectEnd(){
-    console.log("ended selection");
-    isSelecting = false;
- }      
+    selectionDirection = 0.0;
+ }
+        
+        function onSelectStartRight(){
+    selectionDirection = -1.0;
+     
+ }
+ function onSelectEndRight(){
+    selectionDirection = 0.0;
+ }
 function init() {
     camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
     camera.position.z = 2750;
@@ -163,11 +171,8 @@ function init() {
     
 //    scene.add( painter2.mesh );
     scene.add( controller2 );
-    controller2.addEventListener( 'selectstart', onSelectStart );
-    controller2.addEventListener( 'abuttondown', onSelectStart );
-    controller2.addEventListener( 'bbuttondown', onSelectStart );
-    controller2.addEventListener( 'squeezestart', onSelectStart );
-    controller2.addEventListener( 'selectend', onSelectEnd );
+    controller2.addEventListener( 'selectstart', onSelectStartRight );
+    controller2.addEventListener( 'selectend', onSelectEndRight );
     
     document.body.appendChild( renderer.domElement );
 
@@ -177,23 +182,24 @@ function init() {
     light.position.set( 0, 0, 0 );
     scene.add( light );
     
-    object1 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-    object2 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-    
-    object1.position.x=Math.random() * 20 - 2;
-    object1.position.y=Math.random() * 20;
-    object1.position.z=Math.random() * 20 - 2; 
-    
-    object2.position.x=Math.random() * 20 - 2;
-    object2.position.y=Math.random() * 20;
-    object2.position.z=Math.random() * 20 - 2; 
-    controller1.userData.painter = object1;
-    controller2.userData.painter = object2;
+//    object1 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+//    object2 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+//    
+//    object1.position.x=Math.random() * 20 - 2;
+//    object1.position.y=Math.random() * 20;
+//    object1.position.z=Math.random() * 20 - 2; 
+//    
+//    object2.position.x=Math.random() * 20 - 2;
+//    object2.position.y=Math.random() * 20;
+//    object2.position.z=Math.random() * 20 - 2; 
+//    controller1.userData.painter = object1;
+// controller2.userData.painter = object2;
     
 //    scene.add(painter1);// scene.add(painter2);
-    scene.add(object1);
-    scene.add(object2);
+//    scene.add(object1);// scene.add(object2);
 //    
+//    var radius = 0.8;
+//    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
 //    for ( var i = 0; i < 200; i ++ ) { 
 //        var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
 //        object.position.x=Math.random() * 20 - 2; 
@@ -209,47 +215,43 @@ function init() {
         
         
 function handleController1( controller ) {
-//    console.log(object1);
-    object1.position.set(controller.position);
+    var radius = 0.2;
+    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+//    for ( var i = 0; i < 200; i ++ ) { 
+        var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
+        object.position.x=Math.random() * 2 + controller.position.x; 
+        object.position.y=Math.random() * 2 + controller.position.y; 
+        object.position.z=Math.random() * 2 + controller.position.z; 
+        
+        scene.add( object ); 
+//    }
 }
 
 function handleController2( controller ) {
-//    console.log(object2);
     object2.position.set(controller.position);
 }
 function animate() {
     renderer.setAnimationLoop( function () {
         
         handleController1( controller1 );
-        handleController2( controller2 );
+// handleController2( controller2 );
         
-        if (isSelecting){
-//            console.log('selecting and rendering');
-//            points.position.y += 0.01;
+        if (selectionDirection != 0.0){
             console.log(controller1);
             let xrCamera = renderer.xr.getCamera(camera)
             let e = xrCamera.matrixWorld.elements
-            let direction = new THREE.Vector3(-e[8], -e[9], -e[10]).normalize()
-            direction.multiplyScalar(-0.1);
+            let direction = new THREE.Vector3(selectionDirection*e[8], selectionDirection*e[9], selectionDirection*e[10]).normalize()
+            direction.multiplyScalar(-0.05);
             
             points.position.add(direction);
             
         }
-    //mesh.rotation.x += 0.01;
-//    mesh.rotation.y += 0.02;
+
 	renderer.render( scene, camera );
 
 } );
 }
-// 
-//    requestAnimationFrame( animate );
-// 
-//    mesh.rotation.x += 0.01;
-//    mesh.rotation.y += 0.02;
-// 
-//    renderer.render( scene, camera );
-// 
-//}
+
 
   </script>
 </body>
