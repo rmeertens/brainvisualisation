@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <title>Oculus example</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
-      body {
-	  margin: 0;
+        body {
+            margin: 0;
         }
+
     </style>
-  </head>
-  <body>      
-      <script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
-      
-      
-  <script type="module">
-      			import * as THREE from '//cdn.rawgit.com/mrdoob/three.js/master/build/three.module.js';
+</head>
+
+<body>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+
+
+    <script type="module">
+        import * as THREE from '//cdn.rawgit.com/mrdoob/three.js/master/build/three.module.js';
 			//import { BoxLineGeometry } from './node_modules/three/examples/jsm/geometries/BoxLineGeometry.js';
 			import { VRButton } from '//cdn.rawgit.com/mrdoob/three.js/master/examples/jsm/webxr/VRButton.js';
 
 var camera, scene, renderer;
 var geometry, material, mesh;
- var collectionBrainCoordinates = new THREE.Geometry();
-      var controller1, controller2;
+var collectionBrainCoordinates = new THREE.Geometry();
+var controller1, controller2;
 
 var points;     
 var isSelecting = false;
@@ -32,137 +35,126 @@ animate();
 
       
 startLoadingData();
-    var nodes = new Array();
+var nodes = new Array();
     
       
-    function startLoadingData()
-      {
-          
-        
-        var httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function() {
-            if (httpRequest.readyState === 4){
-                // everything is good, the response is received
-                if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-                    console.log("Done loading edges coordinates");
-                    var buffer = httpRequest.response;
-                     var dataview = new DataView(buffer);
-                     var ints = new Float32Array(buffer.byteLength / 4);
-                     for (var i = 0; i < ints.length; i++) {
-                         ints[i] = dataview.getFloat32(i * 4);
-                     }
-                    console.log(ints);
-                    
+function startLoadingData()
+{
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+        if (httpRequest.readyState === 4){
+            // everything is good, the response is received
+            if ((httpRequest.status == 200) || (httpRequest.status == 0)){
+                console.log("Done loading edges coordinates");
+                var buffer = httpRequest.response;
+                 var dataview = new DataView(buffer);
+                 var ints = new Float32Array(buffer.byteLength / 4);
+                 for (var i = 0; i < ints.length; i++) {
+                     ints[i] = dataview.getFloat32(i * 4);
+                 }
+                console.log(ints);
 
-                    for(var row=0; row < ints.length; row=row+3) {
-                        
-                        nodes[row/3] = new Array();
-                        nodes[row/3][0] = ints[row] //x
-                        nodes[row/3][1] = ints[row+1] //y
-                        nodes[row/3][2] = ints[row+2] //z	
-                    }
-                    console.log(nodes)
-                    
-                    
-                    for (var row = 0; row < nodes.length; row++) {
-                        var particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
-                        collectionBrainCoordinates.vertices.push(particle);
-                    }
-                  console.log(collectionBrainCoordinates);
-                    //scene.add(collectionBrainCoordinates);
-                    
-                    
-                    var particles = nodes.length;
-				var geometry = new THREE.BufferGeometry();
-				var positions = [];
-				var colors = [];
-				var color = new THREE.Color();
-				var n = 100;
-                var n2 = n / 2; // particles spread in the cube
-				for ( var i = 0; i < particles; i ++ ) {
-					// positions
-					var x = nodes[i][0];
-					var y = nodes[i][1];
-					var z = nodes[i][2];
-					positions.push( x, y, z );
-					// colors
-					var vx = ( x / n ) + 0.5;
-					var vy = ( y / n ) + 0.5;
-					var vz = ( z / n ) + 0.5;
-					color.setRGB( vx, vy, vz );
-					colors.push( color.r, color.g, color.b );
-				}
-				geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-				geometry.computeBoundingSphere();
-				//
-				var material = new THREE.PointsMaterial( { size: 0.01, vertexColors: THREE.VertexColors } );
-				points = new THREE.Points( geometry, material );
-				scene.add( points );
-                
-            }}}
-            // Send the request
-        httpRequest.open("GET", 'cars.npy', true);
-        httpRequest.responseType = "arraybuffer";
- 
-        httpRequest.send();
-      }
-      
-     function onSelectStart(){
-         console.log("started selection");
-         isSelecting = true;
-     }
-      function onSelectEnd(){
-         console.log("ended selection");
-          isSelecting = false;
-     }
-      
-      function init() {
-          
-				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
-				camera.position.z = 2750;
-				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x050505 );
-				scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
-				//
-				
-				//
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-                renderer.xr.enabled = true;
-          
-                controller1 = renderer.xr.getController( 0 );
-				controller1.addEventListener( 'selectstart', onSelectStart );
-				controller1.addEventListener( 'selectend', onSelectEnd );
-          
-				scene.add( controller1 );
 
-				document.body.appendChild( renderer.domElement );
-				
-    
+                for(var row=0; row < ints.length; row=row+3) {
+
+                    nodes[row/3] = new Array();
+                    nodes[row/3][0] = ints[row] //x
+                    nodes[row/3][1] = ints[row+1] //y
+                    nodes[row/3][2] = ints[row+2] //z	
+                }
+                console.log(nodes)
+
+
+                for (var row = 0; row < nodes.length; row++) {
+                    var particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
+                    collectionBrainCoordinates.vertices.push(particle);
+                }
+              console.log(collectionBrainCoordinates);
+                //scene.add(collectionBrainCoordinates);
+
+
+                var particles = nodes.length;
+            var geometry = new THREE.BufferGeometry();
+            var positions = [];
+            var colors = [];
+            var color = new THREE.Color();
+            var n = 100;
+            var n2 = n / 2; // particles spread in the cube
+            for ( var i = 0; i < particles; i ++ ) {
+                // positions
+                var x = nodes[i][0];
+                var y = nodes[i][1];
+                var z = nodes[i][2];
+                positions.push( x, y, z );
+                // colors
+                var vx = ( x / n ) + 0.5;
+                var vy = ( y / n ) + 0.5;
+                var vz = ( z / n ) + 0.5;
+                color.setRGB( vx, vy, vz );
+                colors.push( color.r, color.g, color.b );
+            }
+            geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+            geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+            geometry.computeBoundingSphere();
+            //
+            var material = new THREE.PointsMaterial( { size: 0.01, vertexColors: THREE.VertexColors } );
+            points = new THREE.Points( geometry, material );
+            scene.add( points );
+
+        }}}
+        // Send the request
+    httpRequest.open("GET", 'cars.npy', true);
+    httpRequest.responseType = "arraybuffer";
+
+    httpRequest.send();
+    }
+      
+ function onSelectStart(){
+    console.log("started selection");
+    isSelecting = true;
+ }
+ function onSelectEnd(){
+    console.log("ended selection");
+    isSelecting = false;
+ }      
+function init() {
+    camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
+    camera.position.z = 2750;
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0x050505 );
+    scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+    //
+
+    //
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.xr.enabled = true;
+
+    controller1 = renderer.xr.getController( 0 );
+    controller1.addEventListener( 'selectstart', onSelectStart );
+    controller1.addEventListener( 'selectend', onSelectEnd );
+
+    scene.add( controller1 );
+
+    document.body.appendChild( renderer.domElement );
+
+
     document.body.appendChild( VRButton.createButton( renderer ) );
-    
-    
-
-
-
 }
- 
+
 function animate() {
     renderer.setAnimationLoop( function () {
         if (isSelecting){
             console.log('selecting and rendering');
 //            points.position.y += 0.01;
-            var distance = 1;
-            var toadd = controller1.quaternion;
-            toadd.x *= distance;
-            toadd.y *= distance;
-            console.log("adding");
-            console.log(toadd);
-            console.log("done adding");
-            points.position.add(toadd);
-            console.log(controller1.quaternion);
+            let xrCamera = renderer.xr.getCamera(camera)
+            let e = xrCamera.matrixWorld.elements
+            let direction = new THREE.Vector3(-e[8], -e[9], -e[10]).normalize()
+            direction.multiplyScalar(-0.1);
+            
+            points.position.add(direction);
+            
         }
     //mesh.rotation.x += 0.01;
 //    mesh.rotation.y += 0.02;
@@ -181,5 +173,6 @@ function animate() {
 //}
 
   </script>
-  </body>
+</body>
+
 </html>
