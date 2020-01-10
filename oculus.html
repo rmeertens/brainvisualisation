@@ -22,7 +22,10 @@
 var camera, scene, renderer;
 var geometry, material, mesh;
  var collectionBrainCoordinates = new THREE.Geometry();
-      
+      var controller1, controller2;
+
+var points;     
+var isSelecting = false;
       
 init();
 animate();
@@ -38,15 +41,12 @@ startLoadingData();
         
         var httpRequest = new XMLHttpRequest();
         httpRequest.onreadystatechange = function() {
-//            processEdgesContent(httpRequest);
-            
             if (httpRequest.readyState === 4){
                 // everything is good, the response is received
                 if ((httpRequest.status == 200) || (httpRequest.status == 0)){
                     console.log("Done loading edges coordinates");
                     var buffer = httpRequest.response;
                      var dataview = new DataView(buffer);
-//                    var ints = Float32Array.from(dataview);
                      var ints = new Float32Array(buffer.byteLength / 4);
                      for (var i = 0; i < ints.length; i++) {
                          ints[i] = dataview.getFloat32(i * 4);
@@ -96,8 +96,8 @@ startLoadingData();
 				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 				geometry.computeBoundingSphere();
 				//
-				var material = new THREE.PointsMaterial( { size: 0.1, vertexColors: THREE.VertexColors } );
-				var points = new THREE.Points( geometry, material );
+				var material = new THREE.PointsMaterial( { size: 0.01, vertexColors: THREE.VertexColors } );
+				points = new THREE.Points( geometry, material );
 				scene.add( points );
                 
             }}}
@@ -108,7 +108,14 @@ startLoadingData();
         httpRequest.send();
       }
       
-     
+     function onSelectStart(){
+         console.log("started selection");
+         isSelecting = true;
+     }
+      function onSelectEnd(){
+         console.log("ended selection");
+          isSelecting = false;
+     }
       
       function init() {
           
@@ -124,29 +131,15 @@ startLoadingData();
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
                 renderer.xr.enabled = true;
+          
+                controller1 = renderer.xr.getController( 0 );
+				controller1.addEventListener( 'selectstart', onSelectStart );
+				controller1.addEventListener( 'selectend', onSelectEnd );
+          
+				scene.add( controller1 );
+
 				document.body.appendChild( renderer.domElement );
 				
-// 
-//    camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
-//    camera.position.z = 1;
-// 
-//    scene = new THREE.Scene();
-// 
-//    geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-//    material = new THREE.MeshNormalMaterial();
-// 
-//    mesh = new THREE.Mesh( geometry, material );
-////    scene.add( mesh );
-//    scene.add( getStars() ); 
-//    
-//    
-//    renderer = new THREE.WebGLRenderer( { antialias: true } );
-//    renderer.xr.enabled = true;
-//
-//    renderer.setSize( window.innerWidth, window.innerHeight );
-//    
-//    document.body.appendChild( renderer.domElement );
-// 
     
     document.body.appendChild( VRButton.createButton( renderer ) );
     
@@ -158,6 +151,19 @@ startLoadingData();
  
 function animate() {
     renderer.setAnimationLoop( function () {
+        if (isSelecting){
+            console.log('selecting and rendering');
+//            points.position.y += 0.01;
+            var distance = 1;
+            var toadd = controller1.quaternion;
+            toadd.x *= distance;
+            toadd.y *= distance;
+            console.log("adding");
+            console.log(toadd);
+            console.log("done adding");
+            points.position.add(toadd);
+            console.log(controller1.quaternion);
+        }
     //mesh.rotation.x += 0.01;
 //    mesh.rotation.y += 0.02;
 	renderer.render( scene, camera );
