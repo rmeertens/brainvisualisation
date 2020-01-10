@@ -208,6 +208,8 @@ function init() {
     object1 = getCircle();
     scene.add(object1);
     
+    object2 = getCircle();
+    scene.add(object2);
     
 }
         
@@ -223,7 +225,10 @@ function handleController1( controller ) {
 }
 
 function handleController2( controller ) {
-    object2.position.set(controller.position);
+    object2.position.x= controller.position.x; 
+    object2.position.y= controller.position.y; 
+    object2.position.z= controller.position.z; 
+
 }
 function animate() {
     renderer.setAnimationLoop( function () {
