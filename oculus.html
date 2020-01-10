@@ -97,11 +97,6 @@ function startLoadingData()
                 var y = nodes[i][1];
                 var z = nodes[i][2];
                 positions.push( x, y, z );
-                // colors
-//                var vx = nodes[i][3];// var vy = nodes[i][3];
-// var vz = nodes[i][3];
-//                color.setRGB( vx, vy, vz );]
-//                console.log(nodes[i][3]);
                 color.setHSL(nodes[i][3], 1.0, 0.5);
                 colors.push( color.r, color.g, color.b );
             }
@@ -221,9 +216,9 @@ function handleController1( controller ) {
     var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
 
     var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
-    object.position.x=Math.random() * 0.2 + controller.position.x; 
-    object.position.y=Math.random() * 0.2 + controller.position.y; 
-    object.position.z=Math.random() * 0.2 + controller.position.z; 
+    object.position.x= controller.position.x; 
+    object.position.y= controller.position.y; 
+    object.position.z= controller.position.z; 
 
     scene.add( object ); 
 
