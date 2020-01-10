@@ -147,6 +147,16 @@ function startLoadingData()
  function onSelectEndRight(){
     selectionDirection = 0.0;
  }
+        
+        
+function getCircle(){
+    var radius = 0.02;
+    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+
+    var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
+    return object;
+}        
+
 function init() {
     camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 3500 );
     camera.position.z = 2750;
@@ -195,48 +205,20 @@ function init() {
     light.position.set( 0, 0, 0 );
     scene.add( light );
     
-//    object1 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-//    object2 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-//    
-//    object1.position.x=Math.random() * 20 - 2;
-//    object1.position.y=Math.random() * 20;
-//    object1.position.z=Math.random() * 20 - 2; 
-//    
-//    object2.position.x=Math.random() * 20 - 2;
-//    object2.position.y=Math.random() * 20;
-//    object2.position.z=Math.random() * 20 - 2; 
-//    controller1.userData.painter = object1;
-// controller2.userData.painter = object2;
+    object1 = getCircle();
+    scene.add(object1);
     
-//    scene.add(painter1);// scene.add(painter2);
-//    scene.add(object1);// scene.add(object2);
-//    
-//    var radius = 0.8;
-//    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
-//    for ( var i = 0; i < 200; i ++ ) { 
-//        var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
-//        object.position.x=Math.random() * 20 - 2; 
-//        object.position.y=Math.random() * 20; 
-//        object.position.z=Math.random() * 20 - 2; 
-//        object.userData.velocity=new THREE.Vector3(); 
-//        object.userData.velocity.x=Math.random() * 0.01 - 0.005; 
-//        object.userData.velocity.y=Math.random() * 0.01 - 0.005; 
-//        object.userData.velocity.z=Math.random() * 0.01 - 0.005; 
-//        scene.add( object ); 
-//    }
+    
 }
         
         
 function handleController1( controller ) {
-    var radius = 0.02;
-    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+    
+    object1.position.x= controller.position.x; 
+    object1.position.y= controller.position.y; 
+    object1.position.z= controller.position.z; 
 
-    var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
-    object.position.x= controller.position.x; 
-    object.position.y= controller.position.y; 
-    object.position.z= controller.position.z; 
-
-    scene.add( object ); 
+//    scene.add( object ); 
 
 }
 
