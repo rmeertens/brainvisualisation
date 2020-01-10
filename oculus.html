@@ -216,16 +216,16 @@ function init() {
         
         
 function handleController1( controller ) {
-    var radius = 0.2;
+    var radius = 0.02;
     var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
-//    for ( var i = 0; i < 200; i ++ ) { 
-        var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
-        object.position.x=Math.random() * 2 + controller.position.x; 
-        object.position.y=Math.random() * 2 + controller.position.y; 
-        object.position.z=Math.random() * 2 + controller.position.z; 
-        
-        scene.add( object ); 
-//    }
+
+    var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
+    object.position.x=Math.random() * 0.2 + controller.position.x; 
+    object.position.y=Math.random() * 0.2 + controller.position.y; 
+    object.position.z=Math.random() * 0.2 + controller.position.z; 
+
+    scene.add( object ); 
+
 }
 
 function handleController2( controller ) {
