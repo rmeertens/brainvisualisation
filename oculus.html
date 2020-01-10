@@ -21,6 +21,8 @@
         import * as THREE from '//cdn.rawgit.com/mrdoob/three.js/master/build/three.module.js';
 			//import { BoxLineGeometry } from './node_modules/three/examples/jsm/geometries/BoxLineGeometry.js';
 			import { VRButton } from '//cdn.rawgit.com/mrdoob/three.js/master/examples/jsm/webxr/VRButton.js';
+            import { TubePainter } from '//cdn.rawgit.com/mrdoob/three.js/master/examples/jsm/misc/TubePainter.js';
+
 
 var camera, scene, renderer;
 var geometry, material, mesh;
@@ -45,14 +47,14 @@ function startLoadingData()
         if (httpRequest.readyState === 4){
             // everything is good, the response is received
             if ((httpRequest.status == 200) || (httpRequest.status == 0)){
-                console.log("Done loading edges coordinates");
+//                console.log("Done loading edges coordinates");
                 var buffer = httpRequest.response;
                  var dataview = new DataView(buffer);
                  var ints = new Float32Array(buffer.byteLength / 4);
                  for (var i = 0; i < ints.length; i++) {
                      ints[i] = dataview.getFloat32(i * 4);
                  }
-                console.log(ints);
+//                console.log(ints);
 
 
                 for(var row=0; row < ints.length; row=row+3) {
@@ -62,14 +64,14 @@ function startLoadingData()
                     nodes[row/3][1] = ints[row+1] //y
                     nodes[row/3][2] = ints[row+2] //z	
                 }
-                console.log(nodes)
+//                console.log(nodes)
 
 
                 for (var row = 0; row < nodes.length; row++) {
                     var particle = new THREE.Vector3(nodes[row][0], nodes[row][1], nodes[row][2]);
                     collectionBrainCoordinates.vertices.push(particle);
                 }
-              console.log(collectionBrainCoordinates);
+//              console.log(collectionBrainCoordinates);
                 //scene.add(collectionBrainCoordinates);
 
 
@@ -133,10 +135,28 @@ function init() {
 
     controller1 = renderer.xr.getController( 0 );
     controller1.addEventListener( 'selectstart', onSelectStart );
+    controller1.addEventListener( 'abuttondown', onSelectStart );
+    controller1.addEventListener( 'bbuttondown', onSelectStart );
+    controller1.addEventListener( 'squeezestart', onSelectStart );
     controller1.addEventListener( 'selectend', onSelectEnd );
-
+    
+    var painter1 = new TubePainter();
+    controller1.userData.painter = painter1;
+    
+    scene.add( painter1.mesh );
     scene.add( controller1 );
 
+    controller2 = renderer.xr.getController( 1 );
+    var painter2 = new TubePainter();
+    controller2.userData.painter = painter2;
+    scene.add( painter2.mesh );
+    scene.add( controller2 );
+    controller2.addEventListener( 'selectstart', onSelectStart );
+    controller2.addEventListener( 'abuttondown', onSelectStart );
+    controller2.addEventListener( 'bbuttondown', onSelectStart );
+    controller2.addEventListener( 'squeezestart', onSelectStart );
+    controller2.addEventListener( 'selectend', onSelectEnd );
+    
     document.body.appendChild( renderer.domElement );
 
 
@@ -146,7 +166,7 @@ function init() {
 function animate() {
     renderer.setAnimationLoop( function () {
         if (isSelecting){
-            console.log('selecting and rendering');
+//            console.log('selecting and rendering');
 //            points.position.y += 0.01;
             let xrCamera = renderer.xr.getCamera(camera)
             let e = xrCamera.matrixWorld.elements
