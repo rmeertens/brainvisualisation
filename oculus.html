@@ -141,14 +141,17 @@ function init() {
     controller1.addEventListener( 'selectend', onSelectEnd );
     
     var painter1 = new TubePainter();
+    var painter2 = new TubePainter();
+    
+    
     controller1.userData.painter = painter1;
     
     scene.add( painter1.mesh );
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
-    var painter2 = new TubePainter();
     controller2.userData.painter = painter2;
+    
     scene.add( painter2.mesh );
     scene.add( controller2 );
     controller2.addEventListener( 'selectstart', onSelectStart );
@@ -161,6 +164,25 @@ function init() {
 
 
     document.body.appendChild( VRButton.createButton( renderer ) );
+    var light = new THREE.PointLight( 0xffffff, 1, 100 );
+    light.position.set( 0, 0, 0 );
+    scene.add( light );
+
+
+//    var radius = 0.8;
+// var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+//
+// for ( var i = 0; i < 200; i ++ ) { 
+//     var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
+//     object.position.x=Math.random() * 20 - 2; 
+//     object.position.y=Math.random() * 20; 
+//     object.position.z=Math.random() * 20 - 2; 
+//     object.userData.velocity=new THREE.Vector3(); 
+//     object.userData.velocity.x=Math.random() * 0.01 - 0.005; 
+//     object.userData.velocity.y=Math.random() * 0.01 - 0.005; 
+//     object.userData.velocity.z=Math.random() * 0.01 - 0.005; 
+//     scene.add( object ); }
+//
 }
 
 function animate() {
@@ -168,6 +190,7 @@ function animate() {
         if (isSelecting){
 //            console.log('selecting and rendering');
 //            points.position.y += 0.01;
+            console.log(controller1);
             let xrCamera = renderer.xr.getCamera(camera)
             let e = xrCamera.matrixWorld.elements
             let direction = new THREE.Vector3(-e[8], -e[9], -e[10]).normalize()
