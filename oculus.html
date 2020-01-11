@@ -41,9 +41,8 @@ animate();
 startLoadingData();
 var nodes = new Array();
     
-      
-var radius = 0.8;
-var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+//      //var radius = 0.8;
+//var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
 
 var object1;
 var object2;//new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
@@ -151,7 +150,9 @@ function startLoadingData()
         
 function getCircle(){
     var radius = 0.02;
-    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+    
+    var geometry = new THREE.IcosahedronBufferGeometry( radius, 0 );
+//    var geometry =  new THREE.ConeGeometry( 100*radius, radius, 8 );
 
     var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
     return object;
@@ -180,6 +181,7 @@ function init() {
     
     var painter1 = new TubePainter();
     var painter2 = new TubePainter();
+    console.log(painter1);
     
     scene.add( controller1 );
 
@@ -211,6 +213,7 @@ function handleController1( controller ) {
     object1.position.x= controller.position.x; 
     object1.position.y= controller.position.y; 
     object1.position.z= controller.position.z; 
+    object1.rotation.set(controller.rotation);
 
 //    scene.add( object ); 
 
@@ -220,6 +223,7 @@ function handleController2( controller ) {
     object2.position.x= controller.position.x; 
     object2.position.y= controller.position.y; 
     object2.position.z= controller.position.z; 
+    object2.rotation.set(controller.rotation);
 
 }
 function animate() {
