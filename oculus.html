@@ -15,6 +15,7 @@
 
 <body>
     <script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+    <script src="VRController.js"></script>
 
 
     <script type="module">
@@ -41,12 +42,22 @@ animate();
 startLoadingData();
 var nodes = new Array();
     
-//      //var radius = 0.8;
-//var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
 
 var object1;
-var object2;//new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-    
+var object2;
+ 
+        
+window.addEventListener( 'vr controller connected', function( event ){
+	//  Here it is, your VR controller instance.
+	//  It’s really a THREE.Object3D so you can just add it to your scene:
+	var controller = event.detail;
+    console.log(controller);
+    console.log("Controller connected");
+})
+        
+        
+window.addEventListener("gamepadconnected", function(e) { gamepadHandler(e, true); }, false);
+window.addEventListener("gamepaddisconnected", function(e) { gamepadHandler(e, false); }, false);
 function getQueryVariable(variable, elsevalue) {
     var query = window.location.search.substring(1);
     var vars = query.split('&');
@@ -151,8 +162,8 @@ function startLoadingData()
 function getCircle(){
     var radius = 0.02;
     
-    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
-//    var geometry =  new THREE.ConeGeometry( 100*radius, radius, 8 );
+//    var geometry = new THREE.IcosahedronBufferGeometry( radius, 2 );
+    var geometry =  new THREE.ConeGeometry( radius, 3*radius, 8 );
 
     var object=new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) ); 
     return object;
@@ -163,25 +174,20 @@ function init() {
     camera.position.z = 2750;
     scene = new THREE.Scene();
     scene.background = new THREE.Color( 0x050505 );
-    scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
-    //
-
-    //
+    
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.xr.enabled = true;
 
     controller1 = renderer.xr.getController( 0 );
+    console.log(controller1);
     controller1.addEventListener( 'selectstart', onSelectStart );
     controller1.addEventListener( 'abuttondown', onSelectStart );
     controller1.addEventListener( 'bbuttondown', onSelectStart );
     controller1.addEventListener( 'squeezestart', onSelectStart );
     controller1.addEventListener( 'selectend', onSelectEnd );
     
-    var painter1 = new TubePainter();
-    var painter2 = new TubePainter();
-    console.log(painter1);
     
     scene.add( controller1 );
 
@@ -195,8 +201,9 @@ function init() {
 
 
     document.body.appendChild( VRButton.createButton( renderer ) );
-    var light = new THREE.PointLight( 0xffffff, 1, 100 );
-    light.position.set( 0, 0, 0 );
+//    var light = new THREE.PointLight( 0xffffff, 1, 100 );
+//    light.position.set( 0, 0, 0 );
+    var light = new THREE.AmbientLight( 0xffffff ); // soft white light
     scene.add( light );
     
     object1 = getCircle();
@@ -213,9 +220,10 @@ function handleController1( controller ) {
     object1.position.x= controller.position.x; 
     object1.position.y= controller.position.y; 
     object1.position.z= controller.position.z; 
-//    object1.rotation.set(controller.rotation);
+    object1.rotation.x = controller.rotation.x;
+    object1.rotation.y = controller.rotation.y;
+    object1.rotation.z = controller.rotation.z;
 
-//    scene.add( object ); 
 
 }
 
@@ -223,12 +231,14 @@ function handleController2( controller ) {
     object2.position.x= controller.position.x; 
     object2.position.y= controller.position.y; 
     object2.position.z= controller.position.z; 
-    object2.rotation.set(controller.rotation);
+    object2.rotation.x = controller.rotation.x;
+    object2.rotation.y = controller.rotation.y;
+    object2.rotation.z = controller.rotation.z;
 
 }
 function animate() {
     renderer.setAnimationLoop( function () {
-        
+    
     handleController1( controller1 );
     handleController2( controller2 );
         
